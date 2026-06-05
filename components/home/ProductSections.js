@@ -34,9 +34,9 @@ export default function ProductCarousel({ title, subtitle, products, viewAllHref
           </div>
         </RevealSection>
 
-        <div ref={scrollRef} className="mt-8 flex gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+        <div ref={scrollRef} className="-mx-1 mt-8 flex gap-3 overflow-x-auto px-1 pb-3 scrollbar-hide snap-x snap-mandatory sm:gap-4">
           {products.map((p) => (
-            <div key={p._id} className="w-[220px] shrink-0 snap-start sm:w-[240px]">
+            <div key={p._id} className="w-[44vw] max-w-[200px] shrink-0 snap-start sm:w-[240px] sm:max-w-none">
               <ProductCard product={p} />
             </div>
           ))}

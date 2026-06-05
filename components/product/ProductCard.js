@@ -91,7 +91,7 @@ export default function ProductCard({ product, variant = "default" }) {
         </div>
 
         {/* Mobile always-visible add button */}
-        <button onClick={handleAdd} className="mt-2 w-full rounded-full border border-slate-200 py-2 text-xs font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600 lg:hidden">
+        <button onClick={handleAdd} className="mt-2.5 w-full min-h-[40px] rounded-full bg-[#0c1929] py-2.5 text-xs font-semibold text-white transition active:scale-[0.98] lg:hidden">
           Add to Bag
         </button>
       </div>

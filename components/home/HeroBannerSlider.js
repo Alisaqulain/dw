@@ -56,7 +56,7 @@ export default function HeroBannerSlider() {
       onTouchEnd={handleTouchEnd}
       aria-label="Promotional banners"
     >
-      <div className="relative aspect-[4/3] sm:aspect-[21/9] lg:aspect-[21/8] min-h-[320px] max-h-[85vh]">
+      <div className="relative aspect-[3/4] min-h-[420px] max-h-[90vh] sm:aspect-[21/9] sm:min-h-[320px] lg:aspect-[21/8]">
         {BANNER_SLIDES.map((s, i) => (
           <div
             key={s.id}
@@ -82,19 +82,19 @@ export default function HeroBannerSlider() {
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
               {slide.badge}
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 text-3xl font-bold leading-[1.15] text-white sm:mt-5 sm:text-5xl lg:text-6xl">
               {slide.title}
               <span className="mt-1 block bg-gradient-to-r from-white via-sky-100 to-cyan-200 bg-clip-text text-transparent">
                 {slide.highlight}
               </span>
             </h1>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/85 sm:mt-4 sm:text-lg">
               {slide.description}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
                 href={slide.href}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-bold text-[#0c1929] shadow-xl transition hover:scale-[1.02] hover:shadow-2xl"
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#0c1929] shadow-xl transition active:scale-[0.98] sm:px-8 sm:py-3.5"
               >
                 {slide.cta}
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,7 +103,7 @@ export default function HeroBannerSlider() {
               </Link>
               <Link
                 href="/shop"
-                className="inline-flex items-center rounded-full border-2 border-white/30 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition active:bg-white/20 sm:px-8 sm:py-3.5"
               >
                 Browse All
               </Link>
@@ -114,7 +114,7 @@ export default function HeroBannerSlider() {
         <button
           type="button"
           onClick={prev}
-          className="absolute left-3 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:left-6 sm:h-12 sm:w-12"
+          className="absolute left-2 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:flex sm:left-6 sm:h-12 sm:w-12"
           aria-label="Previous slide"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,7 +124,7 @@ export default function HeroBannerSlider() {
         <button
           type="button"
           onClick={next}
-          className="absolute right-3 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:right-6 sm:h-12 sm:w-12"
+          className="absolute right-2 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:flex sm:right-6 sm:h-12 sm:w-12"
           aria-label="Next slide"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

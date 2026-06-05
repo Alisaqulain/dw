@@ -7,6 +7,14 @@ import Analytics from "@/components/layout/Analytics";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0c1929",
+};
+
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {

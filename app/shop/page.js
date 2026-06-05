@@ -118,15 +118,15 @@ function ShopContent() {
           </h1>
           <p className="mt-1 text-sm text-slate-500">{total} products</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setFilterOpen(true)} className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 lg:hidden">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={() => setFilterOpen(true)} className="flex min-h-[44px] items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-50 lg:hidden">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
             Filters
           </button>
           <select
             value={filters.sort}
             onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 outline-none focus:border-sky-400"
+            className="min-h-[44px] flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-sky-400 sm:flex-none"
           >
             <option value="newest">Newest</option>
             <option value="sale">Hot Sale</option>
@@ -177,7 +177,7 @@ function ShopContent() {
       {filterOpen && (
         <>
           <div className="fixed inset-0 z-50 bg-black/40 lg:hidden" onClick={() => setFilterOpen(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-white p-6 animate-slide-up lg:hidden">
+          <div className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] animate-slide-up lg:hidden">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold">Filters</h3>
               <button onClick={() => setFilterOpen(false)} className="text-slate-400">✕</button>

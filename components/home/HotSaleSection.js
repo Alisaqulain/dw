@@ -57,7 +57,7 @@ export default function HotSaleSection({ products }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl bg-white/80 p-4 shadow-lg ring-1 ring-rose-100 backdrop-blur-sm">
+          <div className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white/80 p-4 shadow-lg ring-1 ring-rose-100 backdrop-blur-sm sm:w-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-600">Ends in</span>
             <div className="flex gap-2">
               {[
