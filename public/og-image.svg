@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0f2fe"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="900" cy="150" r="200" fill="#bae6fd" opacity="0.4"/>
+  <circle cx="200" cy="500" r="150" fill="#7dd3fc" opacity="0.3"/>
+  <text x="600" y="280" font-family="Arial,sans-serif" font-size="72" font-weight="700" fill="#0ea5e9" text-anchor="middle">TrustSilcon</text>
+  <text x="600" y="350" font-family="Arial,sans-serif" font-size="28" fill="#64748b" text-anchor="middle">Premium Body-Safe Silicone Wellness</text>
+  <text x="600" y="400" font-family="Arial,sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle">Discreet Delivery � Secure Checkout</text>
+</svg>

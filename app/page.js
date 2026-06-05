@@ -1,65 +1,95 @@
-import Image from "next/image";
+import { connectDB } from "@/lib/mongodb";
+import Product from "@/models/Product";
+import Review from "@/models/Review";
+import HeroBannerSlider from "@/components/home/HeroBannerSlider";
+import PromoFeatures from "@/components/home/PromoFeatures";
+import HotSaleSection from "@/components/home/HotSaleSection";
+import CategoryTiles from "@/components/home/CategoryTiles";
+import ProductCarousel from "@/components/home/ProductSections";
+import DealOfDay, { BundleSection } from "@/components/home/DealAndBundle";
+import WhyTrustSilcon from "@/components/home/WhyTrustSilcon";
+import { DiscreetDeliverySection, BodySafeSection, ShiprocketSection, BlogGuideSection } from "@/components/home/ContentSections";
+import HomeReviews from "@/components/home/HomeReviews";
+import FAQ, { NewsletterSection } from "@/components/home/FAQ";
 
-export default function Home() {
+export const revalidate = 60;
+
+export const metadata = {
+  title: "TrustSilcon — Premium Adult Intimate Wellness Products India",
+  description: "Shop premium body-safe silicone intimate wellness products with discreet delivery across India. COD available. Medical-grade materials, plain packaging, fast shipping.",
+  keywords: ["intimate wellness", "adult wellness", "body-safe silicone", "discreet delivery", "wellness products India", "TrustSilcon"],
+  openGraph: {
+    title: "TrustSilcon — Premium Intimate Wellness",
+    description: "Body-safe silicone wellness products with discreet delivery across India.",
+  },
+};
+
+async function getHomeData() {
+  try {
+    await connectDB();
+    const [bestsellers, newArrivals, dealProducts, bundles, reviews, saleCandidates] = await Promise.all([
+      Product.find({ active: true, bestseller: true }).limit(10).lean(),
+      Product.find({ active: true }).sort({ createdAt: -1 }).limit(8).lean(),
+      Product.find({ active: true, dealOfDay: true }).limit(1).lean(),
+      Product.find({ active: true, isBundle: true }).limit(4).lean(),
+      Review.find({ approved: true }).sort({ createdAt: -1 }).limit(8).lean(),
+      Product.find({ active: true, comparePrice: { $gt: 0 } }).limit(24).lean(),
+    ]);
+
+    const dealOfDay = dealProducts[0] || (await Product.findOne({ active: true, comparePrice: { $gt: 0 } }).sort({ createdAt: -1 }).lean());
+
+    const hotSale = saleCandidates
+      .filter((p) => p.comparePrice > p.price)
+      .sort((a, b) => (b.comparePrice - b.price) / b.comparePrice - (a.comparePrice - a.price) / a.comparePrice)
+      .slice(0, 8);
+
+    return {
+      bestsellers: JSON.parse(JSON.stringify(bestsellers)),
+      newArrivals: JSON.parse(JSON.stringify(newArrivals)),
+      hotSale: JSON.parse(JSON.stringify(hotSale)),
+      dealOfDay: dealOfDay ? JSON.parse(JSON.stringify(dealOfDay)) : null,
+      bundles: JSON.parse(JSON.stringify(bundles)),
+      reviews: JSON.parse(JSON.stringify(reviews)),
+    };
+  } catch {
+    return { bestsellers: [], newArrivals: [], hotSale: [], dealOfDay: null, bundles: [], reviews: [] };
+  }
+}
+
+export default async function HomePage() {
+  const { bestsellers, newArrivals, hotSale, dealOfDay, bundles, reviews } = await getHomeData();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      <HeroBannerSlider />
+      <PromoFeatures />
+      <HotSaleSection products={hotSale} />
+      <CategoryTiles />
+      <ProductCarousel title="Bestsellers" subtitle="Most loved by our community" products={bestsellers} viewAllHref="/shop?sort=bestseller" />
+      {/* 7. New arrivals */}
+      <div className="bg-sky-50/30">
+        <ProductCarousel title="New Arrivals" subtitle="Fresh additions to our wellness collection" products={newArrivals} viewAllHref="/shop?sort=newest" />
+      </div>
+      {/* 8. Deal of the day */}
+      <DealOfDay product={dealOfDay} />
+      {/* 9. Bundle offers */}
+      <BundleSection products={bundles} />
+      {/* 10. Why choose TrustSilcon */}
+      <WhyTrustSilcon />
+      {/* 11. Discreet delivery */}
+      <DiscreetDeliverySection />
+      {/* 12. Body-safe silicone */}
+      <BodySafeSection />
+      {/* 13. Shiprocket tracking */}
+      <ShiprocketSection />
+      {/* 14. Customer reviews */}
+      <HomeReviews reviews={reviews} />
+      {/* 15. FAQ */}
+      <FAQ />
+      {/* 16. Blog/guide */}
+      <BlogGuideSection />
+      {/* 17. Newsletter */}
+      <NewsletterSection />
+    </>
   );
 }
