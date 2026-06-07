@@ -164,9 +164,11 @@ export default function AdminProductsPage() {
               <div className="sm:col-span-2">
                 <label className="text-xs text-slate-500">Images</label>
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageUpload} className="mt-1 w-full text-sm" />
-                <p className="mt-1 text-[10px] text-slate-400">JPG, PNG, WebP · auto-compressed · saved to /public/uploads on localhost</p>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  JPG, PNG, WebP · auto-compressed · localhost: /public/uploads · Vercel: Blob storage
+                </p>
                 {(uploading || uploadNote) && (
-                  <p className={`text-xs ${uploadNote.toLowerCase().includes("fail") || uploadNote.includes("Unauthorized") ? "text-red-500" : "text-emerald-600"}`}>
+                  <p className={`text-xs ${uploadNote.toLowerCase().includes("fail") || uploadNote.includes("Unauthorized") || uploadNote.includes("Vercel") || uploadNote.includes("read-only") ? "text-red-500" : "text-emerald-600"}`}>
                     {uploading ? "Processing..." : uploadNote}
                   </p>
                 )}
