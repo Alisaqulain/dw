@@ -38,13 +38,13 @@ export default function AgeVerification() {
           <Logo size="lg" href={false} className="mx-auto" />
 
           <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50 ring-1 ring-sky-100">
-            <span className="text-2xl font-bold text-sky-600">18+</span>
+            <span className="text-2xl font-bold text-sky-600">21+</span>
           </div>
 
           <h2 className="mt-6 text-2xl font-bold text-slate-900">Age Verification Required</h2>
           <p className="mt-4 text-sm leading-relaxed text-slate-600">
-            This website contains adult wellness products intended for individuals aged 18 and above.
-            You must be 18+ to continue browsing TrustSilcon.
+            This website contains adult wellness products intended for individuals aged 21 and above.
+            You must be 21+ to continue browsing TrustSilcon.
           </p>
 
           <p className="mt-3 text-xs text-slate-400">
@@ -56,13 +56,13 @@ export default function AgeVerification() {
               onClick={handleConfirm}
               className="rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-10 py-3.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:from-sky-600 hover:to-blue-700"
             >
-              I am 18+
+              I am 21+
             </button>
             <button
               onClick={handleUnderAge}
               className="rounded-full border-2 border-slate-200 px-10 py-3.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              I am under 18
+              I am under 21
             </button>
           </div>
         </div>

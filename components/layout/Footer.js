@@ -36,7 +36,7 @@ export default function Footer() {
               TrustSilcon is India&apos;s premium intimate wellness brand. Body-safe silicone products, discreet packaging, and fast delivery nationwide.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {["🛡️ Body-Safe", "📦 Discreet", "🚀 Fast Ship", "🔒 Secure", "18+"].map((t) => (
+              {["🛡️ Body-Safe", "📦 Discreet", "🚀 Fast Ship", "🔒 Secure", "21+"].map((t) => (
                 <span key={t} className="rounded-full bg-white/5 px-3 py-1 text-[10px] font-medium ring-1 ring-white/10">{t}</span>
               ))}
             </div>
@@ -86,7 +86,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} TrustSilcon. All rights reserved. Adults 18+ only.</p>
+          <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} TrustSilcon. All rights reserved. Adults 21+ only.</p>
           <p className="text-[10px] text-slate-600">Intimate wellness · Discreet delivery · Body-safe silicone · Premium care</p>
         </div>
       </div>

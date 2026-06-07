@@ -14,7 +14,7 @@ export default function TermsPage() {
       <p>By using the TrustSilcon website and placing orders, you agree to these terms and conditions.</p>
 
       <h2>Eligibility</h2>
-      <p>You must be 18 years of age or older to browse or purchase from TrustSilcon. By using this site, you confirm that you meet this requirement.</p>
+      <p>You must be 21 years of age or older to browse or purchase from TrustSilcon. By using this site, you confirm that you meet this requirement.</p>
 
       <h2>Products</h2>
       <p>All products are intended for adult wellness use only. Product images are for illustration purposes; actual products may vary slightly in appearance, packaging, or shade.</p>

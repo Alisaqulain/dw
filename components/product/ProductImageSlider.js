@@ -4,7 +4,14 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 
 export function getValidImages(images) {
-  return (images || []).filter((img) => img?.url);
+  return (images || []).filter((img) => {
+    const url = typeof img === "string" ? img : img?.url;
+    return Boolean(url);
+  }).map((img) => (typeof img === "string" ? { url: img } : img));
+}
+
+function shouldUseUnoptimized(url) {
+  return url.startsWith("/uploads") || url.includes("blob.vercel-storage.com");
 }
 
 export default function ProductImageSlider({
@@ -91,7 +98,7 @@ export default function ProductImageSlider({
         fill
         className={`object-cover transition-opacity duration-300 ${isDetail ? "" : "product-image"}`}
         sizes={sizes}
-        unoptimized={img.url.startsWith("/uploads")}
+        unoptimized={shouldUseUnoptimized(img.url)}
       />
 
       {badge}
