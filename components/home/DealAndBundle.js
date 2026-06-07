@@ -3,13 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/product/ProductCard";
-import { formatPrice } from "@/lib/utils";
+import PriceDisplay from "@/components/product/PriceDisplay";
 import { RevealSection } from "@/hooks/useReveal";
 
 export default function DealOfDay({ product }) {
   if (!product) return null;
-  const discount = product.comparePrice > product.price
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : 0;
 
   return (
     <section className="bg-gradient-to-br from-violet-50 via-white to-sky-50 py-12 sm:py-16">
@@ -27,14 +25,8 @@ export default function DealOfDay({ product }) {
                 <p className="text-xs font-bold uppercase tracking-widest text-violet-600">Limited Time Offer</p>
                 <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h2>
                 <p className="mt-3 text-slate-600">{product.shortDescription}</p>
-                <div className="mt-6 flex items-baseline gap-3">
-                  <span className="text-3xl font-bold text-slate-900">{formatPrice(product.price)}</span>
-                  {product.comparePrice > product.price && (
-                    <>
-                      <span className="text-lg text-slate-400 line-through">{formatPrice(product.comparePrice)}</span>
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-600">{discount}% OFF</span>
-                    </>
-                  )}
+                <div className="mt-6">
+                  <PriceDisplay price={product.price} originalPrice={product.comparePrice} size="lg" />
                 </div>
                 <Link href={`/products/${product.slug}`} className="mt-8 inline-flex w-fit items-center rounded-full bg-violet-600 px-8 py-3.5 text-sm font-semibold text-white hover:bg-violet-700">
                   Grab This Deal →

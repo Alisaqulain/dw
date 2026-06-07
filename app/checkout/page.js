@@ -138,15 +138,12 @@ export default function CheckoutPage() {
 
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-sky-100">
             <h2 className="font-bold text-slate-800">Payment Method</h2>
-            <div className="mt-4 space-y-3">
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-sky-100 p-4 has-[:checked]:border-sky-400 has-[:checked]:bg-sky-50">
-                <input type="radio" name="paymentMethod" value="COD" checked={form.paymentMethod === "COD"} onChange={handleChange} />
-                <div><p className="font-medium">Cash on Delivery</p><p className="text-xs text-slate-500">Pay when you receive</p></div>
-              </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-sky-100 p-4 has-[:checked]:border-sky-400 has-[:checked]:bg-sky-50">
-                <input type="radio" name="paymentMethod" value="Online" checked={form.paymentMethod === "Online"} onChange={handleChange} />
-                <div><p className="font-medium">Online Payment</p><p className="text-xs text-slate-500">UPI, Cards (placeholder)</p></div>
-              </label>
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500 text-lg text-white">💵</span>
+              <div>
+                <p className="font-medium text-slate-800">Cash on Delivery (COD)</p>
+                <p className="text-xs text-slate-500">Pay when your order arrives · Discreet packaging</p>
+              </div>
             </div>
           </div>
 

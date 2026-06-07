@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import ProductImageSlider, { getValidImages } from "@/components/product/ProductImageSlider";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import ProductCard from "@/components/product/ProductCard";
 import { PageLoader } from "@/components/ui/Loading";
 import Stars from "@/components/ui/Stars";
+import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
 import { formatPrice, isLowStock, validatePincode } from "@/lib/utils";
 
 const TABS = ["Description", "Material & Care", "Shipping", "Reviews", "FAQ"];
@@ -27,15 +28,16 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [pincode, setPincode] = useState("");
   const [deliveryMsg, setDeliveryMsg] = useState("");
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
     async function load() {
+      setGalleryIndex(0);
       const res = await fetch(`/api/products?slug=${slug}`);
       const data = await res.json();
       if (data.product) {
@@ -75,7 +77,8 @@ export default function ProductDetailPage() {
     </div>
   );
 
-  const discount = product.comparePrice > product.price ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : 0;
+  const discount = getDiscountPercent(product.price, product.comparePrice);
+  const galleryImages = getValidImages(product.images);
 
   return (
     <>
@@ -86,18 +89,31 @@ export default function ProductDetailPage() {
           {/* Gallery */}
           <div>
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-sky-50 ring-1 ring-slate-100">
-              {product.images?.[selectedImage]?.url ? (
-                <Image src={product.images[selectedImage].url} alt={product.name} fill className="object-cover" priority sizes="(max-width:768px) 100vw, 50vw" />
-              ) : (
-                <div className="flex h-full items-center justify-center"><div className="h-32 w-32 rounded-full bg-sky-100" /></div>
-              )}
-              {discount > 0 && <span className="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>}
+              <ProductImageSlider
+                images={product.images}
+                alt={product.name}
+                sizes="(max-width:768px) 100vw, 50vw"
+                variant="detail"
+                className="h-full w-full"
+                index={galleryIndex}
+                onIndexChange={setGalleryIndex}
+                badge={
+                  discount > 0 ? (
+                    <span className="absolute left-4 top-4 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>
+                  ) : null
+                }
+              />
             </div>
-            {product.images?.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-hide">
-                {product.images.map((img, i) => (
-                  <button key={i} onClick={() => setSelectedImage(i)} className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 ${selectedImage === i ? "ring-sky-500" : "ring-slate-100"}`}>
-                    <Image src={img.url} alt="" fill className="object-cover" sizes="64px" />
+                {galleryImages.map((img, i) => (
+                  <button
+                    key={img.url}
+                    type="button"
+                    onClick={() => setGalleryIndex(i)}
+                    className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 ${galleryIndex === i ? "ring-sky-500" : "ring-slate-100"}`}
+                  >
+                    <img src={img.url} alt="" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -109,13 +125,13 @@ export default function ProductDetailPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-sky-500">{product.shopCollection || product.category}</p>
             <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
             <div className="mt-3 flex items-center gap-3">
-              <Stars rating={avgRating} showValue />
-              {reviews.length > 0 && <span className="text-sm text-slate-500">({reviews.length} reviews)</span>}
+              <Stars rating={avgRating || 5} size="md" showValue alwaysShow />
+              <span className="text-sm text-slate-500">
+                {reviews.length > 0 ? `(${reviews.length} reviews)` : "(5.0 rating)"}
+              </span>
             </div>
-            <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-slate-900">{formatPrice(product.price)}</span>
-              {product.comparePrice > product.price && <span className="text-lg text-slate-400 line-through">{formatPrice(product.comparePrice)}</span>}
-              {discount > 0 && <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-600">{discount}% OFF</span>}
+            <div className="mt-4">
+              <PriceDisplay price={product.price} originalPrice={product.comparePrice} size="lg" />
             </div>
             <p className="mt-4 text-slate-600">{product.shortDescription}</p>
 
@@ -191,11 +207,19 @@ export default function ProductDetailPage() {
               <div className="space-y-4">
                 {reviews.length === 0 ? <p className="text-sm text-slate-500">No reviews yet.</p> : reviews.map((r) => (
                   <div key={r._id} className="rounded-2xl bg-slate-50 p-5">
-                    <div className="flex items-center justify-between"><span className="font-semibold">{r.name}</span><Stars rating={r.rating} size="sm" /></div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{r.name}</span>
+                      <Stars rating={r.rating} size="sm" alwaysShow />
+                    </div>
                     <p className="mt-2 text-sm text-slate-600">{r.review}</p>
                   </div>
                 ))}
-                <Link href="/reviews" className="inline-block text-sm font-medium text-sky-500">Write a review →</Link>
+                <Link
+                  href={`/reviews?productId=${product._id}#write-review`}
+                  className="inline-block text-sm font-medium text-sky-500 hover:text-sky-600"
+                >
+                  Write a review →
+                </Link>
               </div>
             )}
             {activeTab === 4 && (

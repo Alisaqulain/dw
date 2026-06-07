@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatPrice, createSlug } from "@/lib/utils";
 import { compressImageFile } from "@/lib/clientCompress";
+import { getDiscountPercent } from "@/components/product/PriceDisplay";
 
 const emptyProduct = {
   name: "", shortDescription: "", fullDescription: "", price: "", comparePrice: "",
@@ -42,18 +43,18 @@ export default function AdminProductsPage() {
         body: JSON.stringify({ image: compressed }),
       });
       const data = await res.json();
-      if (data.url) {
+      if (res.ok && data.url) {
         setForm((prev) => ({
           ...prev,
           images: [...prev.images, { url: data.url, publicId: data.publicId, storage: data.storage }],
         }));
-        if (data.savedPercent != null) {
-          setUploadNote(`Saved ${data.savedPercent}% · ${Math.round(data.compressedSize / 1024)}KB WebP`);
-        } else {
-          setUploadNote("Upload complete");
-        }
+        setUploadNote(
+          data.savedPercent != null
+            ? `Uploaded · Saved ${data.savedPercent}% · ${Math.round(data.compressedSize / 1024)}KB`
+            : `Uploaded successfully (${data.storage || "local"})`
+        );
       } else {
-        setUploadNote(data.error || "Upload failed");
+        setUploadNote(data.error || "Upload failed — log in as admin first");
       }
     } catch (err) {
       setUploadNote(err.message || "Upload failed");
@@ -132,8 +133,13 @@ export default function AdminProductsPage() {
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Name *</label><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} /></div>
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Short Description *</label><input required value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} className={inputClass} /></div>
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Full Description *</label><textarea required rows={3} value={form.fullDescription} onChange={(e) => setForm({ ...form, fullDescription: e.target.value })} className={inputClass} /></div>
-              <div><label className="text-xs text-slate-500">Price *</label><input required type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={inputClass} /></div>
-              <div><label className="text-xs text-slate-500">Compare Price</label><input type="number" value={form.comparePrice} onChange={(e) => setForm({ ...form, comparePrice: e.target.value })} className={inputClass} /></div>
+              <div><label className="text-xs text-slate-500">Sale Price (₹) *</label><input required type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={inputClass} placeholder="1299" /></div>
+              <div><label className="text-xs text-slate-500">Original Price / MRP (₹)</label><input type="number" value={form.comparePrice} onChange={(e) => setForm({ ...form, comparePrice: e.target.value })} className={inputClass} placeholder="1799" /></div>
+              {form.comparePrice > form.price && (
+                <div className="sm:col-span-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                  Discount preview: {getDiscountPercent(Number(form.price), Number(form.comparePrice))}% OFF
+                </div>
+              )}
               <div><label className="text-xs text-slate-500">Stock *</label><input required type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={inputClass} /></div>
               <div><label className="text-xs text-slate-500">Category</label><input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputClass} /></div>
               <div><label className="text-xs text-slate-500">Collection</label>
@@ -157,9 +163,10 @@ export default function AdminProductsPage() {
               </div>
               <div className="sm:col-span-2">
                 <label className="text-xs text-slate-500">Images</label>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" />
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageUpload} className="mt-1 w-full text-sm" />
+                <p className="mt-1 text-[10px] text-slate-400">JPG, PNG, WebP · auto-compressed · saved to /public/uploads on localhost</p>
                 {(uploading || uploadNote) && (
-                  <p className={`text-xs ${uploadNote.includes("failed") || uploadNote.includes("Error") ? "text-red-500" : "text-sky-500"}`}>
+                  <p className={`text-xs ${uploadNote.toLowerCase().includes("fail") || uploadNote.includes("Unauthorized") ? "text-red-500" : "text-emerald-600"}`}>
                     {uploading ? "Processing..." : uploadNote}
                   </p>
                 )}

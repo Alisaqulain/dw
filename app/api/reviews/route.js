@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Review from "@/models/Review";
-import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request) {
@@ -20,17 +19,17 @@ export async function GET(request) {
     }
     if (productId) query.productId = productId;
 
-    const reviews = await Review.find(query)
-      .populate("productId", "name slug")
-      .sort({ createdAt: -1 })
-      .lean();
+    const reviews = await Review.find(query).sort({ createdAt: -1 }).lean();
 
     let avgRating = 0;
     if (productId && reviews.length > 0) {
       avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
     }
 
-    return NextResponse.json({ reviews, avgRating: Math.round(avgRating * 10) / 10 });
+    return NextResponse.json({
+      reviews: JSON.parse(JSON.stringify(reviews)),
+      avgRating: Math.round(avgRating * 10) / 10,
+    });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

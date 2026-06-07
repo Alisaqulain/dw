@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
-import { formatPrice, isLowStock } from "@/lib/utils";
+import { isLowStock } from "@/lib/utils";
 import Stars from "@/components/ui/Stars";
+import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
+import ProductImageSlider from "@/components/product/ProductImageSlider";
 
 export default function QuickViewModal() {
   const { quickViewProduct, setQuickViewProduct, addToCart } = useCart();
@@ -18,7 +19,7 @@ export default function QuickViewModal() {
   if (!quickViewProduct) return null;
 
   const p = quickViewProduct;
-  const discount = p.comparePrice > p.price ? Math.round(((p.comparePrice - p.price) / p.comparePrice) * 100) : 0;
+  const discount = getDiscountPercent(p.price, p.comparePrice);
 
   const handleAdd = () => {
     if (p.stock <= 0) { showToast("Out of stock", "error"); return; }
@@ -35,25 +36,30 @@ export default function QuickViewModal() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
         <div className="relative aspect-square bg-gradient-to-br from-sky-50 to-slate-50">
-          {p.images?.[0]?.url ? (
-            <Image src={p.images[0].url} alt={p.name} fill className="object-cover" sizes="500px" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-sky-200"><div className="h-24 w-24 rounded-full bg-sky-100" /></div>
-          )}
-          {discount > 0 && <span className="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>}
+          <ProductImageSlider
+            images={p.images}
+            alt={p.name}
+            sizes="500px"
+            variant="detail"
+            className="h-full w-full"
+            badge={
+              discount > 0 ? (
+                <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>
+              ) : null
+            }
+          />
         </div>
         <div className="p-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-sky-500">{p.shopCollection || p.category}</p>
           <h2 className="mt-1 text-xl font-bold text-slate-900">{p.name}</h2>
-          {(p.avgRating > 0) && (
-            <div className="mt-2 flex items-center gap-2">
-              <Stars rating={p.avgRating} size="sm" showValue />
-              {p.reviewCount > 0 && <span className="text-xs text-slate-500">({p.reviewCount} reviews)</span>}
-            </div>
-          )}
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900">{formatPrice(p.price)}</span>
-            {p.comparePrice > p.price && <span className="text-sm text-slate-400 line-through">{formatPrice(p.comparePrice)}</span>}
+          <div className="mt-2 flex items-center gap-2">
+            <Stars rating={p.avgRating || 5} size="sm" showValue alwaysShow />
+            <span className="text-xs text-slate-500">
+              {p.reviewCount > 0 ? `(${p.reviewCount} reviews)` : "(5.0)"}
+            </span>
+          </div>
+          <div className="mt-3">
+            <PriceDisplay price={p.price} originalPrice={p.comparePrice} size="md" />
           </div>
           <p className="mt-3 line-clamp-3 text-sm text-slate-600">{p.shortDescription}</p>
           {isLowStock(p.stock) && <p className="mt-2 text-xs font-medium text-orange-600">Only {p.stock} left!</p>}
