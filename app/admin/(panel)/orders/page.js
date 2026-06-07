@@ -51,6 +51,21 @@ export default function AdminOrdersPage() {
     refreshSelected(id);
   };
 
+  const deleteOrder = async (id, orderNumber) => {
+    if (!window.confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
+
+    const res = await fetch(`/api/admin/orders?id=${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      showToast("Order deleted");
+      setSelected(null);
+      fetchOrders();
+    } else {
+      showToast(data.error || "Failed to delete order", "error");
+    }
+  };
+
   const createShipment = async (orderId, retry = false) => {
     setShipmentLoading(true);
     try {
@@ -201,6 +216,14 @@ export default function AdminOrdersPage() {
                 ))}
               </select>
             </div>
+
+            <button
+              type="button"
+              onClick={() => deleteOrder(selected._id, selected.orderNumber)}
+              className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              Delete Order
+            </button>
           </div>
         )}
       </div>

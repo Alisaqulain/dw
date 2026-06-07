@@ -34,9 +34,8 @@ export default function ProductCard({ product, variant = "default" }) {
         <ProductImageSlider
           images={product.images}
           alt={product.name}
-          sizes="(max-width:768px) 50vw, 25vw"
           variant="card"
-          className="absolute inset-0"
+          className="absolute inset-0 size-full"
           badge={
             <div className="absolute left-2.5 top-2.5 z-20 flex flex-col gap-1">
               {discountPercent > 0 && (

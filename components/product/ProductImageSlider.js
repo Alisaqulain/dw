@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import Image from "next/image";
 
 export function getValidImages(images) {
   return (images || []).filter((img) => {
@@ -10,14 +9,9 @@ export function getValidImages(images) {
   }).map((img) => (typeof img === "string" ? { url: img } : img));
 }
 
-function shouldUseUnoptimized(url) {
-  return url.startsWith("/uploads") || url.includes("blob.vercel-storage.com");
-}
-
 export default function ProductImageSlider({
   images,
   alt,
-  sizes = "(max-width:768px) 50vw, 25vw",
   variant = "card",
   badge,
   className = "",
@@ -26,6 +20,7 @@ export default function ProductImageSlider({
 }) {
   const validImages = getValidImages(images);
   const [internalIndex, setInternalIndex] = useState(0);
+  const [broken, setBroken] = useState(false);
   const touchStart = useRef(0);
 
   const active = controlledIndex ?? internalIndex;
@@ -33,11 +28,16 @@ export default function ProductImageSlider({
   const setActive = useCallback(
     (index) => {
       const next = (index + validImages.length) % validImages.length;
+      setBroken(false);
       if (onIndexChange) onIndexChange(next);
       else setInternalIndex(next);
     },
     [validImages.length, onIndexChange]
   );
+
+  useEffect(() => {
+    setBroken(false);
+  }, [validImages[active]?.url]);
 
   useEffect(() => {
     if (controlledIndex != null && controlledIndex >= validImages.length) {
@@ -74,9 +74,9 @@ export default function ProductImageSlider({
     if (Math.abs(diff) > 40) (diff > 0 ? next : prev)(e);
   };
 
-  if (validImages.length === 0) {
+  if (validImages.length === 0 || broken) {
     return (
-      <div className={`relative flex items-center justify-center bg-gradient-to-br from-slate-50 to-sky-50/30 ${className}`}>
+      <div className={`relative flex size-full items-center justify-center bg-gradient-to-br from-slate-50 to-sky-50/30 ${className}`}>
         <div className="h-20 w-20 rounded-full bg-gradient-to-br from-sky-200 to-blue-200 opacity-40" />
       </div>
     );
@@ -87,18 +87,19 @@ export default function ProductImageSlider({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`relative size-full overflow-hidden ${className}`}
       onTouchStart={validImages.length > 1 ? onTouchStart : undefined}
       onTouchEnd={validImages.length > 1 ? onTouchEnd : undefined}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         key={img.url}
         src={img.url}
         alt={alt}
-        fill
-        className={`object-cover transition-opacity duration-300 ${isDetail ? "" : "product-image"}`}
-        sizes={sizes}
-        unoptimized={shouldUseUnoptimized(img.url)}
+        className={`size-full object-cover ${isDetail ? "" : "product-image"}`}
+        loading="lazy"
+        decoding="async"
+        onError={() => setBroken(true)}
       />
 
       {badge}
