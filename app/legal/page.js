@@ -1,16 +1,25 @@
 import Link from "next/link";
 import ContentPageHero from "@/components/layout/ContentPageHero";
+import JsonLd from "@/components/seo/JsonLd";
 import { LEGAL_PAGES } from "@/lib/faq";
 import { STORE_CONTACT } from "@/lib/constants";
+import { buildMetadata, breadcrumbSchema, webPageSchema } from "@/lib/seo";
 
-export const metadata = {
-  title: "Legal Information",
-  description: "TrustSilcon legal policies — terms, privacy, cookies, shipping, returns, and age verification.",
-};
+export const metadata = buildMetadata({
+  title: "Legal Information & Policies",
+  description: "TrustSilcon legal hub — terms, privacy, cookies, shipping, returns, and age verification policies for our India wellness store.",
+  path: "/legal",
+});
 
 export default function LegalPage() {
   return (
     <>
+      <JsonLd
+        data={[
+          webPageSchema({ title: "Legal Information", description: "TrustSilcon legal policies.", path: "/legal" }),
+          breadcrumbSchema([{ name: "Home", href: "/" }, { name: "Legal" }]),
+        ]}
+      />
       <ContentPageHero
         title="Legal Information"
         subtitle="Our policies on privacy, orders, shipping, returns, and responsible use."

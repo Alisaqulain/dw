@@ -12,10 +12,10 @@ export default async function sitemap() {
     "privacy-policy", "cookie-policy", "shipping-policy",
     "return-refund-policy", "terms", "age-policy",
   ].map((path) => ({
-    url: `${baseUrl}/${path}`,
+    url: path ? `${baseUrl.replace(/\/$/, "")}/${path}` : baseUrl.replace(/\/$/, ""),
     lastModified: new Date(),
-    changeFrequency: path === "" ? "daily" : path === "blog" ? "weekly" : "weekly",
-    priority: path === "" ? 1 : path === "shop" || path === "collections" ? 0.9 : 0.8,
+    changeFrequency: path === "" ? "daily" : path === "blog" ? "weekly" : "monthly",
+    priority: path === "" ? 1 : path === "shop" || path === "collections" ? 0.9 : path === "blog" ? 0.75 : 0.8,
   }));
 
   const blogPages = getAllGuideSlugs().map((slug) => ({

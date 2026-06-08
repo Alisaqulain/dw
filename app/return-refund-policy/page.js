@@ -1,3 +1,5 @@
+import { buildMetadata } from "@/lib/seo";
+
 function PolicyLayout({ title, children }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -8,7 +10,11 @@ function PolicyLayout({ title, children }) {
   );
 }
 
-export const metadata = { title: "Return & Refund Policy" };
+export const metadata = buildMetadata({
+  title: "Return & Refund Policy",
+  description: "TrustSilcon return and refund policy for unopened wellness products within 7 days. Hygiene rules, refund process, and exchange guidelines.",
+  path: "/return-refund-policy",
+});
 
 export default function ReturnRefundPolicyPage() {
   return (

@@ -1,3 +1,5 @@
+import { buildMetadata } from "@/lib/seo";
+
 function PolicyLayout({ title, children }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -8,7 +10,11 @@ function PolicyLayout({ title, children }) {
   );
 }
 
-export const metadata = { title: "Age Verification Policy" };
+export const metadata = buildMetadata({
+  title: "Age Verification Policy — Adults 21+",
+  description: "TrustSilcon age verification policy. Our intimate wellness products are for adults 21 years and older in India.",
+  path: "/age-policy",
+});
 
 export default function AgePolicyPage() {
   return (

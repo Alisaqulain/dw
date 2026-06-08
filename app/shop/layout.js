@@ -1,4 +1,5 @@
-import { buildMetadata } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildMetadata, breadcrumbSchema, webPageSchema } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Shop — Premium Body-Safe Wellness Products",
@@ -15,5 +16,22 @@ export const metadata = buildMetadata({
 });
 
 export default function ShopLayout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          webPageSchema({
+            title: "Shop Wellness Products",
+            description: "Browse body-safe silicone intimate wellness products at TrustSilcon.",
+            path: "/shop",
+          }),
+          breadcrumbSchema([
+            { name: "Home", href: "/" },
+            { name: "Shop" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

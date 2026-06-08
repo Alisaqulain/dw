@@ -1,3 +1,5 @@
+import { buildMetadata } from "@/lib/seo";
+
 function PolicyLayout({ title, children }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -8,7 +10,11 @@ function PolicyLayout({ title, children }) {
   );
 }
 
-export const metadata = { title: "Cookie Policy" };
+export const metadata = buildMetadata({
+  title: "Cookie Policy",
+  description: "How TrustSilcon uses cookies and similar technologies on our website. Learn about analytics, preferences, and your choices.",
+  path: "/cookie-policy",
+});
 
 export default function CookiePolicyPage() {
   return (

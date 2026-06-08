@@ -1,8 +1,13 @@
 import PolicyLayout from "@/components/legal/PolicyLayout";
 import Link from "next/link";
 import { STORE_CONTACT } from "@/lib/constants";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Terms & Conditions" };
+export const metadata = buildMetadata({
+  title: "Terms & Conditions",
+  description: "TrustSilcon terms and conditions for website use, orders, payments, delivery, and adult wellness product purchases in India.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

@@ -1,3 +1,5 @@
+import { buildMetadata } from "@/lib/seo";
+
 function PolicyLayout({ title, children }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -8,7 +10,12 @@ function PolicyLayout({ title, children }) {
   );
 }
 
-export const metadata = { title: "Shipping Policy" };
+export const metadata = buildMetadata({
+  title: "Shipping Policy — Discreet Delivery India",
+  description: "TrustSilcon shipping policy: discreet plain packaging, 3–7 day pan-India delivery, COD, free shipping above ₹999, and Shiprocket tracking.",
+  path: "/shipping-policy",
+  keywords: ["discreet shipping policy", "delivery India", "COD wellness products"],
+});
 
 export default function ShippingPolicyPage() {
   return (

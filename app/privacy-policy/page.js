@@ -1,8 +1,15 @@
 import PolicyLayout from "@/components/legal/PolicyLayout";
 import Link from "next/link";
 import { STORE_CONTACT } from "@/lib/constants";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Privacy Policy" };
+export const metadata = buildMetadata({
+  title: "Privacy Policy",
+  description:
+    "TrustSilcon privacy policy — how we collect, use, and protect your personal data. Discreet billing, secure checkout, and confidential order handling.",
+  path: "/privacy-policy",
+  keywords: ["privacy policy", "data protection", "discreet billing TrustSilcon"],
+});
 
 export default function PrivacyPolicyPage() {
   return (
