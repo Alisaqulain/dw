@@ -14,6 +14,7 @@ const TrackingEventSchema = new mongoose.Schema({
   description: String,
   location: String,
   timestamp: { type: Date, default: Date.now },
+  source: { type: String, default: "" },
 });
 
 const OrderSchema = new mongoose.Schema(
@@ -53,11 +54,14 @@ const OrderSchema = new mongoose.Schema(
       default: "pending",
     },
     marketingOptIn: { type: Boolean, default: false },
+    // Shiprocket fields
     shiprocketOrderId: { type: String, default: "" },
     shiprocketShipmentId: { type: String, default: "" },
+    shipmentId: { type: String, default: "" },
     awbCode: { type: String, default: "" },
     courierName: { type: String, default: "" },
     trackingUrl: { type: String, default: "" },
+    currentStatus: { type: String, default: "" },
     deliveryStatus: {
       type: String,
       enum: [
@@ -74,7 +78,12 @@ const OrderSchema = new mongoose.Schema(
       default: "",
     },
     shiprocketError: { type: String, default: "" },
+    shiprocketCreateResponse: { type: mongoose.Schema.Types.Mixed, default: null },
+    shiprocketAwbResponse: { type: mongoose.Schema.Types.Mixed, default: null },
+    shiprocketLastTrackResponse: { type: mongoose.Schema.Types.Mixed, default: null },
+    lastTrackingSync: { type: Date, default: null },
     trackingEvents: [TrackingEventSchema],
+    trackingHistory: [TrackingEventSchema],
     reviewRequestSent: { type: Boolean, default: false },
     statusEmailsSent: {
       shipped: { type: Boolean, default: false },

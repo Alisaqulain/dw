@@ -44,7 +44,11 @@ function TrackContent() {
   };
 
   const order = result?.order;
-  const timeline = result?.timeline?.length ? result.timeline : order?.trackingEvents || [];
+  const timeline = result?.timeline?.length
+    ? result.timeline
+    : order?.trackingEvents || [];
+  const displayStatus = order?.currentStatus || order?.deliveryStatus;
+  const statusLabel = order?.statusMessage || order?.deliveryStatusLabel;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
@@ -74,6 +78,12 @@ function TrackContent() {
         <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-600 ring-1 ring-red-100">{error}</div>
       )}
 
+      {result?.syncError && (
+        <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-center text-sm text-amber-800 ring-1 ring-amber-100">
+          Could not refresh live tracking. Showing last saved status.
+        </div>
+      )}
+
       {order && (
         <div className="mt-8 space-y-6">
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-sky-100">
@@ -82,11 +92,23 @@ function TrackContent() {
                 <p className="text-xs text-slate-500">Order ID</p>
                 <p className="text-xl font-bold text-slate-900 font-mono">{order.orderNumber}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <StatusBadge status={order.orderStatus} />
-                {order.deliveryStatus && <StatusBadge status={order.deliveryStatus} type="delivery" />}
-              </div>
+              {displayStatus ? (
+                <StatusBadge status={displayStatus} type="delivery" />
+              ) : order.hasShipment ? (
+                <StatusBadge status="ORDER_PLACED" type="delivery" />
+              ) : (
+                <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                  Awaiting shipment
+                </span>
+              )}
             </div>
+
+            {statusLabel && (
+              <div className="mt-4 rounded-xl bg-sky-50 px-4 py-3 ring-1 ring-sky-100">
+                <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">Current Status</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{statusLabel}</p>
+              </div>
+            )}
 
             <div className="mt-5 grid grid-cols-2 gap-4 text-sm border-t border-slate-50 pt-5">
               <div><p className="text-slate-500">Total</p><p className="font-semibold">{formatPrice(order.total)}</p></div>
@@ -105,7 +127,15 @@ function TrackContent() {
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-sky-100">
             <h3 className="font-bold text-slate-900">Delivery Timeline</h3>
             <div className="mt-5">
-              <DeliveryTimeline events={[...timeline].reverse()} currentStatus={order.deliveryStatus} />
+              <DeliveryTimeline
+                events={[...timeline].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))}
+                currentStatus={displayStatus}
+              />
+              {order.lastTrackingSync && (
+                <p className="mt-4 text-center text-xs text-slate-400">
+                  Last updated: {new Date(order.lastTrackingSync).toLocaleString("en-IN")}
+                </p>
+              )}
             </div>
           </div>
         </div>

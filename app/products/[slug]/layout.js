@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import JsonLd from "@/components/seo/JsonLd";
-import { buildMetadata, productSchema, breadcrumbSchema } from "@/lib/seo";
+import { buildMetadata, productSchema, breadcrumbSchema, getProductImageUrl } from "@/lib/seo";
 
 async function getProduct(slug) {
   try {
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }) {
     description,
     path: `/products/${slug}`,
     keywords: [product.name, product.category, product.shopCollection, "body-safe silicone", "TrustSilcon"].filter(Boolean),
-    image: product.images?.[0] || "/og-image.svg",
+    image: getProductImageUrl(product.images),
     type: "website",
   });
 }

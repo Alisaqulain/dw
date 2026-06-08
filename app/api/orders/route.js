@@ -13,7 +13,6 @@ import {
   validatePincode,
 } from "@/lib/utils";
 import { sendOrderConfirmation } from "@/lib/email";
-import { createShipmentForOrder, isShiprocketConfigured } from "@/lib/shiprocket";
 
 export async function POST(request) {
   try {
@@ -122,7 +121,7 @@ export async function POST(request) {
       total,
       paymentMethod: paymentMethod || "COD",
       paymentStatus: paymentMethod === "Online" ? "pending" : "pending",
-      orderStatus: "confirmed",
+      orderStatus: paymentMethod === "Online" ? "pending" : "confirmed",
       marketingOptIn: !!marketingOptIn,
     });
 
@@ -155,19 +154,7 @@ export async function POST(request) {
     // Send confirmation email (non-blocking)
     sendOrderConfirmation(order).catch(console.error);
 
-    // Create Shiprocket shipment (non-blocking — order saved even if this fails)
-    if (isShiprocketConfigured()) {
-      createShipmentForOrder(order)
-        .then(async (result) => {
-          if (result.success && result.updates) {
-            await Order.findByIdAndUpdate(order._id, result.updates);
-          } else if (result.error) {
-            await Order.findByIdAndUpdate(order._id, { shiprocketError: result.error });
-            console.error("Shiprocket order creation failed:", result.error);
-          }
-        })
-        .catch((err) => console.error("Shiprocket error:", err.message));
-    }
+    // Shiprocket shipment is created manually by admin after payment/COD confirmation
 
     return NextResponse.json({
       success: true,

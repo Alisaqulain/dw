@@ -1,6 +1,5 @@
 import { handleShiprocketWebhook } from "@/lib/shiprocket-webhook";
 
-/** @deprecated Use /api/webhooks/shiprocket */
 export async function POST(request) {
   try {
     return await handleShiprocketWebhook(request);
