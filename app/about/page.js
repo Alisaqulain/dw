@@ -1,16 +1,26 @@
 import Link from "next/link";
 import ContentPageHero from "@/components/layout/ContentPageHero";
-import ContactForm from "@/components/contact/ContactForm";
+import JsonLd from "@/components/seo/JsonLd";
 import { STORE_CONTACT } from "@/lib/constants";
+import { buildMetadata, breadcrumbSchema } from "@/lib/seo";
 
-export const metadata = {
-  title: "About Us",
-  description: "Learn about TrustSilcon — premium body-safe silicone wellness products with discreet delivery.",
-};
+export const metadata = buildMetadata({
+  title: "About Us — India's Premium Intimate Wellness Brand",
+  description:
+    "TrustSilcon is India's premium intimate wellness brand. Medical-grade body-safe silicone, discreet packaging, fast delivery, and trusted by 50,000+ customers.",
+  path: "/about",
+  keywords: ["about TrustSilcon", "intimate wellness brand India", "body-safe silicone brand"],
+});
 
 export default function AboutPage() {
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", href: "/" },
+          { name: "About Us" },
+        ])}
+      />
       <ContentPageHero
         title="About TrustSilcon"
         subtitle="India's premium intimate wellness brand — body-safe, discreet, and trusted."

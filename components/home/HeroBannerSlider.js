@@ -65,7 +65,7 @@ export default function HeroBannerSlider() {
           >
             <Image
               src={s.image}
-              alt=""
+              alt={`${s.title} ${s.highlight} — TrustSilcon`}
               fill
               priority={i === 0}
               className={`object-cover transition-transform duration-[8000ms] ease-out ${i === active ? "scale-110" : "scale-100"}`}

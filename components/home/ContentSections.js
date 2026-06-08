@@ -138,10 +138,10 @@ export function ShiprocketSection() {
 
 export function BlogGuideSection() {
   const guides = [
-    { icon: "🛡️", title: "Understanding Body-Safe Silicone", desc: "Why medical-grade silicone matters for intimate wellness.", href: "/about" },
-    { icon: "📦", title: "Discreet Shopping Guide", desc: "How we protect your privacy from checkout to delivery.", href: "/privacy-policy" },
-    { icon: "✨", title: "Product Care & Maintenance", desc: "Keep your wellness products clean and lasting longer.", href: "/about" },
-    { icon: "📖", title: "First-Time Buyer's Guide", desc: "Everything to know before your first TrustSilcon order.", href: "/shop?collection=Starter Kits" },
+    { icon: "🛡️", title: "Understanding Body-Safe Silicone", desc: "Why medical-grade silicone matters for intimate wellness.", href: "/blog/body-safe-silicone-guide" },
+    { icon: "📦", title: "Discreet Shopping Guide", desc: "How we protect your privacy from checkout to delivery.", href: "/blog/discreet-shopping-delivery-guide" },
+    { icon: "✨", title: "Product Care & Maintenance", desc: "Keep your wellness products clean and lasting longer.", href: "/blog/product-care-maintenance" },
+    { icon: "📖", title: "First-Time Buyer's Guide", desc: "Everything to know before your first TrustSilcon order.", href: "/blog/first-time-buyers-guide" },
   ];
 
   return (
@@ -151,6 +151,9 @@ export function BlogGuideSection() {
           <span className="text-xs font-bold uppercase tracking-widest text-sky-500">Wellness Guides</span>
           <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">Learn & Explore</h2>
           <p className="mx-auto mt-3 max-w-xl text-slate-500">Expert guides to help you make informed wellness choices.</p>
+          <Link href="/blog" className="mt-4 inline-flex text-sm font-semibold text-sky-600 hover:text-sky-700">
+            View all guides →
+          </Link>
         </RevealSection>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {guides.map((g, i) => (

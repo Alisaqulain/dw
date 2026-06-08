@@ -133,11 +133,17 @@ export default function Header() {
               Shop All
               <svg className={`h-4 w-4 transition ${megaOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
-            {COLLECTIONS.slice(0, 6).map((col) => (
+            <Link href="/collections" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
+              Collections
+            </Link>
+            {COLLECTIONS.slice(0, 5).map((col) => (
               <Link key={col.slug} href={col.href} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
                 {col.label}
               </Link>
             ))}
+            <Link href="/blog" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
+              Guides
+            </Link>
           </nav>
         </div>
 
@@ -179,6 +185,8 @@ export default function Header() {
               </div>
               <div className="mt-6 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
                 {[
+                  { href: "/collections", label: "Collections" },
+                  { href: "/blog", label: "Guides" },
                   { href: "/track-order", label: "Track Order" },
                   { href: "/contact", label: "Contact" },
                   { href: "/faq", label: "FAQ" },

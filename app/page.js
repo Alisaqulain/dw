@@ -2,27 +2,38 @@ import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Review from "@/models/Review";
 import HeroBannerSlider from "@/components/home/HeroBannerSlider";
+import StatsBar from "@/components/home/StatsBar";
 import PromoFeatures from "@/components/home/PromoFeatures";
 import HotSaleSection from "@/components/home/HotSaleSection";
 import CategoryTiles from "@/components/home/CategoryTiles";
 import ProductCarousel from "@/components/home/ProductSections";
 import DealOfDay, { BundleSection } from "@/components/home/DealAndBundle";
 import WhyTrustSilcon from "@/components/home/WhyTrustSilcon";
+import HomeCTA from "@/components/home/HomeCTA";
 import { DiscreetDeliverySection, BodySafeSection, ShiprocketSection, BlogGuideSection } from "@/components/home/ContentSections";
 import HomeReviews from "@/components/home/HomeReviews";
 import FAQ, { NewsletterSection } from "@/components/home/FAQ";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildMetadata, faqSchema } from "@/lib/seo";
+import { FAQ_ITEMS } from "@/lib/faq";
 
 export const revalidate = 60;
 
-export const metadata = {
-  title: "TrustSilcon — Premium Adult Intimate Wellness Products India",
-  description: "Shop premium body-safe silicone intimate wellness products with discreet delivery across India. COD available. Medical-grade materials, plain packaging, fast shipping.",
-  keywords: ["intimate wellness", "adult wellness", "body-safe silicone", "discreet delivery", "wellness products India", "TrustSilcon"],
-  openGraph: {
-    title: "TrustSilcon — Premium Intimate Wellness",
-    description: "Body-safe silicone wellness products with discreet delivery across India.",
-  },
-};
+export const metadata = buildMetadata({
+  title: "TrustSilcon — Premium Intimate Wellness Products India",
+  description:
+    "Shop premium body-safe silicone intimate wellness products with discreet delivery across India. Medical-grade materials, COD available, plain packaging, 3–7 day shipping. Trusted by 50,000+ customers.",
+  path: "/",
+  keywords: [
+    "intimate wellness India",
+    "body-safe silicone products",
+    "discreet delivery India",
+    "adult wellness shop",
+    "medical-grade silicone",
+    "COD wellness products",
+    "TrustSilcon",
+  ],
+});
 
 async function getHomeData() {
   try {
@@ -61,7 +72,9 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={faqSchema(FAQ_ITEMS.slice(0, 6))} />
       <HeroBannerSlider />
+      <StatsBar />
       <PromoFeatures />
       <HotSaleSection products={hotSale} />
       <CategoryTiles />
@@ -84,7 +97,9 @@ export default async function HomePage() {
       <ShiprocketSection />
       {/* 14. Customer reviews */}
       <HomeReviews reviews={reviews} />
-      {/* 15. FAQ */}
+      {/* 15. CTA banner */}
+      <HomeCTA />
+      {/* 16. FAQ */}
       <FAQ />
       {/* 16. Blog/guide */}
       <BlogGuideSection />

@@ -1,17 +1,31 @@
 import Link from "next/link";
 import ContentPageHero from "@/components/layout/ContentPageHero";
 import FAQAccordion from "@/components/legal/FAQAccordion";
+import JsonLd from "@/components/seo/JsonLd";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { STORE_CONTACT } from "@/lib/constants";
+import { buildMetadata, faqSchema, breadcrumbSchema } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = buildMetadata({
   title: "FAQ — Frequently Asked Questions",
-  description: "Answers about discreet delivery, body-safe products, COD, returns, and customer support at TrustSilcon.",
-};
+  description:
+    "Answers about discreet delivery, body-safe silicone products, COD, returns, shipping, and customer support at TrustSilcon India.",
+  path: "/faq",
+  keywords: ["TrustSilcon FAQ", "discreet delivery FAQ", "intimate wellness questions", "COD wellness India"],
+});
 
 export default function FAQPage() {
   return (
     <>
+      <JsonLd
+        data={[
+          faqSchema(FAQ_ITEMS),
+          breadcrumbSchema([
+            { name: "Home", href: "/" },
+            { name: "FAQ" },
+          ]),
+        ]}
+      />
       <ContentPageHero
         title="Frequently Asked Questions"
         subtitle="Everything you need to know about ordering, delivery, privacy, and our wellness products."

@@ -69,7 +69,8 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">Shop</h4>
             <ul className="mt-4 space-y-2.5">
-              {COLLECTIONS.slice(0, 6).map((link) => (
+              <li><Link href="/collections" className="text-sm text-slate-400 transition hover:text-sky-400">All Collections</Link></li>
+              {COLLECTIONS.slice(0, 5).map((link) => (
                 <li key={link.href}><Link href={link.href} className="text-sm text-slate-400 transition hover:text-sky-400">{link.label}</Link></li>
               ))}
             </ul>
@@ -83,6 +84,9 @@ export default function Footer() {
                 { href: "/faq", label: "FAQ" },
                 { href: "/reviews", label: "Reviews" },
                 { href: "/about", label: "About Us" },
+                { href: "/blog", label: "Wellness Guides" },
+                { href: "/discreet-delivery", label: "Discreet Delivery" },
+                { href: "/body-safe-silicone", label: "Body-Safe Silicone" },
                 { href: "/shop", label: "All Products" },
               ].map((link) => (
                 <li key={link.href}><Link href={link.href} className="text-sm text-slate-400 transition hover:text-sky-400">{link.label}</Link></li>
