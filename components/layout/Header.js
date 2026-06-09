@@ -8,6 +8,8 @@ import OfferBar from "@/components/layout/OfferBar";
 import MegaMenu from "@/components/layout/MegaMenu";
 import { useCart } from "@/context/CartContext";
 import { COLLECTIONS } from "@/lib/constants";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
+import { getWhatsAppDisplay, getWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function Header() {
   const { cartCount, openCart } = useCart();
@@ -88,6 +90,15 @@ export default function Header() {
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
+              <a
+                href={getWhatsAppUrl("Hi TrustSilcon!")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 md:flex"
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+                <span className="hidden lg:inline">{getWhatsAppDisplay()}</span>
+              </a>
               <Link href="/track-order" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600 md:flex">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 Track
@@ -183,7 +194,17 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
-              <div className="mt-6 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
+              <a
+                href={getWhatsAppUrl("Hi TrustSilcon!")}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-bold text-white"
+              >
+                <WhatsAppIcon className="h-5 w-5" />
+                WhatsApp {getWhatsAppDisplay()}
+              </a>
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
                 {[
                   { href: "/collections", label: "Collections" },
                   { href: "/blog", label: "Guides" },

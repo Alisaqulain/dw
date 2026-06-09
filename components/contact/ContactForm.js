@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
 import { STORE_CONTACT } from "@/lib/constants";
+import { getWhatsAppDisplay, getWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function ContactForm() {
   const { showToast } = useToast();
@@ -93,7 +94,7 @@ export function ContactInfo() {
             </a>
           ))}
           <a
-            href={`https://wa.me/${STORE_CONTACT.whatsapp}?text=${encodeURIComponent("Hi TrustSilcon, I need help.")}`}
+            href={getWhatsAppUrl("Hi TrustSilcon, I need help.")}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-start gap-3 rounded-xl bg-emerald-50 p-4 transition hover:bg-emerald-100/80"
@@ -103,7 +104,7 @@ export function ContactInfo() {
             </span>
             <div>
               <p className="text-xs font-medium text-slate-500">WhatsApp</p>
-              <p className="mt-0.5 text-sm font-semibold text-emerald-700">Chat with us on WhatsApp</p>
+              <p className="mt-0.5 text-sm font-semibold text-emerald-700">+91 {getWhatsAppDisplay()}</p>
             </div>
           </a>
           {STORE_CONTACT.instagram && (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { STORE_CONTACT } from "@/lib/constants";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 const NAV_ITEMS = [
   {
@@ -43,7 +43,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: `https://wa.me/${STORE_CONTACT.whatsapp}?text=${encodeURIComponent("Hi TrustSilcon!")}`,
+    href: getWhatsAppUrl("Hi TrustSilcon!"),
     label: "Chat",
     external: true,
     icon: () => (

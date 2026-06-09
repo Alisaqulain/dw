@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import { COLLECTIONS, STORE_CONTACT } from "@/lib/constants";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
+import { getWhatsAppDisplay, getWhatsAppUrl } from "@/lib/whatsapp";
 
 const legalLinks = [
   { href: "/legal", label: "Legal Hub" },
@@ -51,6 +53,15 @@ export default function Footer() {
                   {phone.display}
                 </a>
               ))}
+              <a
+                href={getWhatsAppUrl("Hi TrustSilcon!")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-emerald-400 transition hover:text-emerald-300"
+              >
+                <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                WhatsApp: {getWhatsAppDisplay()}
+              </a>
               {STORE_CONTACT.instagram && (
                 <a
                   href={STORE_CONTACT.instagram}
