@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { trackInitiateCheckout } from "@/lib/metaPixel";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -31,6 +32,14 @@ export default function CheckoutPage() {
 
   const deliveryCharge = getDeliveryCharge(cartTotal - discount);
   const total = cartTotal - discount + deliveryCharge;
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const checkoutTracked = useRef(false);
+
+  useEffect(() => {
+    if (checkoutTracked.current || cart.length === 0) return;
+    checkoutTracked.current = true;
+    trackInitiateCheckout({ cart, cartTotal, cartCount });
+  }, [cart, cartTotal, cartCount]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

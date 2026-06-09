@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { StatusBadge } from "@/components/shiprocket/DeliveryTimeline";
+import { trackPurchase } from "@/lib/metaPixel";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -17,6 +18,14 @@ function SuccessContent() {
       .then((d) => { if (d.order) setOrder(d.order); })
       .catch(() => {});
   }, [orderNumber]);
+
+  useEffect(() => {
+    if (!order?.orderNumber) return;
+    const key = `meta_pixel_purchase_${order.orderNumber}`;
+    if (sessionStorage.getItem(key)) return;
+    trackPurchase(order);
+    sessionStorage.setItem(key, "1");
+  }, [order]);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 sm:py-20 text-center">

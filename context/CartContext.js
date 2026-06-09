@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getCartLineId } from "@/lib/productVariants";
+import { trackAddToCart } from "@/lib/metaPixel";
 
 const CartContext = createContext(null);
 const CART_KEY = "trustsilcon_cart";
@@ -81,6 +82,7 @@ export function CartProvider({ children }) {
       }
       return [...prev, item];
     });
+    trackAddToCart(product, quantity);
     if (open) setCartOpen(true);
   }, []);
 

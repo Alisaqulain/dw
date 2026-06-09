@@ -13,6 +13,7 @@ import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisp
 import { formatPrice, isLowStock, validatePincode } from "@/lib/utils";
 import VariantSelector, { validateVariantSelection } from "@/components/product/VariantSelector";
 import { getProductColors, getProductSizes } from "@/lib/productVariants";
+import { trackViewContent } from "@/lib/metaPixel";
 
 const TABS = ["Description", "Material & Care", "Shipping", "Reviews", "FAQ"];
 
@@ -67,6 +68,10 @@ export default function ProductDetailPage() {
     }
     load();
   }, [slug, addRecentlyViewed]);
+
+  useEffect(() => {
+    if (product) trackViewContent(product);
+  }, [product]);
 
   const checkPincode = () => {
     if (!validatePincode(pincode)) { setDeliveryMsg("Please enter a valid 6-digit pincode"); return; }
