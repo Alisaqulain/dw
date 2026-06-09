@@ -1,3 +1,4 @@
+import { SITE_LOGO } from "@/lib/constants";
 import { getSiteUrl } from "@/lib/utils";
 
 export default function manifest() {
@@ -10,7 +11,7 @@ export default function manifest() {
     background_color: "#ffffff",
     theme_color: "#0c1929",
     icons: [
-      { src: "/lgowithbg.png", sizes: "360x180", type: "image/png" },
+      { src: SITE_LOGO, sizes: "1536x1024", type: "image/png" },
     ],
     categories: ["shopping", "health"],
     lang: "en-IN",
