@@ -5,16 +5,31 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { isLowStock } from "@/lib/utils";
+import { getProductColors, getProductSizes } from "@/lib/productVariants";
 import Stars from "@/components/ui/Stars";
 import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
 import ProductImageSlider from "@/components/product/ProductImageSlider";
+import VariantSelector, { validateVariantSelection } from "@/components/product/VariantSelector";
 
 export default function QuickViewModal() {
   const { quickViewProduct, setQuickViewProduct, addToCart } = useCart();
   const { showToast } = useToast();
   const [qty, setQty] = useState(1);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
 
-  useEffect(() => { setQty(1); }, [quickViewProduct]);
+  useEffect(() => {
+    setQty(1);
+    if (!quickViewProduct) {
+      setSelectedColor("");
+      setSelectedSize("");
+      return;
+    }
+    const colors = getProductColors(quickViewProduct);
+    const sizes = getProductSizes(quickViewProduct);
+    setSelectedColor(colors.length === 1 ? colors[0].name : "");
+    setSelectedSize(sizes.length === 1 ? sizes[0] : "");
+  }, [quickViewProduct]);
 
   if (!quickViewProduct) return null;
 
@@ -23,7 +38,9 @@ export default function QuickViewModal() {
 
   const handleAdd = () => {
     if (p.stock <= 0) { showToast("Out of stock", "error"); return; }
-    addToCart(p, qty);
+    const variantError = validateVariantSelection(p, selectedColor, selectedSize);
+    if (variantError) { showToast(variantError, "error"); return; }
+    addToCart(p, qty, { color: selectedColor, size: selectedSize });
     showToast("Added to bag!");
     setQuickViewProduct(null);
   };
@@ -62,6 +79,18 @@ export default function QuickViewModal() {
             <PriceDisplay price={p.price} originalPrice={p.comparePrice} size="md" />
           </div>
           <p className="mt-3 line-clamp-3 text-sm text-slate-600">{p.shortDescription}</p>
+
+          <div className="mt-4">
+            <VariantSelector
+              product={p}
+              selectedColor={selectedColor}
+              selectedSize={selectedSize}
+              onColorChange={setSelectedColor}
+              onSizeChange={setSelectedSize}
+              compact
+            />
+          </div>
+
           {isLowStock(p.stock) && <p className="mt-2 text-xs font-medium text-orange-600">Only {p.stock} left!</p>}
           <div className="mt-5 flex items-center gap-3">
             <div className="flex items-center rounded-full border border-slate-200">

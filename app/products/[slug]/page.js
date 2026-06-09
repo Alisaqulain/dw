@@ -11,6 +11,8 @@ import { PageLoader } from "@/components/ui/Loading";
 import Stars from "@/components/ui/Stars";
 import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
 import { formatPrice, isLowStock, validatePincode } from "@/lib/utils";
+import VariantSelector, { validateVariantSelection } from "@/components/product/VariantSelector";
+import { getProductColors, getProductSizes } from "@/lib/productVariants";
 
 const TABS = ["Description", "Material & Care", "Shipping", "Reviews", "FAQ"];
 
@@ -34,14 +36,22 @@ export default function ProductDetailPage() {
   const [pincode, setPincode] = useState("");
   const [deliveryMsg, setDeliveryMsg] = useState("");
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
 
   useEffect(() => {
     async function load() {
       setGalleryIndex(0);
+      setSelectedColor("");
+      setSelectedSize("");
       const res = await fetch(`/api/products?slug=${slug}`);
       const data = await res.json();
       if (data.product) {
         setProduct(data.product);
+        const colors = getProductColors(data.product);
+        const sizes = getProductSizes(data.product);
+        if (colors.length === 1) setSelectedColor(colors[0].name);
+        if (sizes.length === 1) setSelectedSize(sizes[0]);
         addRecentlyViewed(data.product);
         const [relRes, revRes] = await Promise.all([
           fetch(`/api/products?collection=${encodeURIComponent(data.product.shopCollection || data.product.category)}&limit=5`),
@@ -65,7 +75,9 @@ export default function ProductDetailPage() {
 
   const handleAdd = () => {
     if (product.stock <= 0) { showToast("Out of stock", "error"); return; }
-    addToCart(product, quantity);
+    const variantError = validateVariantSelection(product, selectedColor, selectedSize);
+    if (variantError) { showToast(variantError, "error"); return; }
+    addToCart(product, quantity, { color: selectedColor, size: selectedSize });
     showToast("Added to bag!");
   };
 
@@ -150,10 +162,20 @@ export default function ProductDetailPage() {
               {deliveryMsg && <p className="mt-2 text-xs text-emerald-600">{deliveryMsg}</p>}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
-              {product.material && <span className="rounded-full bg-slate-100 px-3 py-1">{product.material}</span>}
-              {product.size && <span className="rounded-full bg-slate-100 px-3 py-1">Size: {product.size}</span>}
-              {product.color && <span className="rounded-full bg-slate-100 px-3 py-1">{product.color}</span>}
+            {product.material && (
+              <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+                <span className="rounded-full bg-slate-100 px-3 py-1">{product.material}</span>
+              </div>
+            )}
+
+            <div className="mt-5">
+              <VariantSelector
+                product={product}
+                selectedColor={selectedColor}
+                selectedSize={selectedSize}
+                onColorChange={setSelectedColor}
+                onSizeChange={setSelectedSize}
+              />
             </div>
 
             {product.stock <= 0 ? (

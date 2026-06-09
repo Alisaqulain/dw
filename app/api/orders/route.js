@@ -71,6 +71,8 @@ export async function POST(request) {
         price: product.price,
         quantity: item.quantity,
         image: product.images[0]?.url || "",
+        color: item.color || "",
+        size: item.size || "",
       });
       subtotal += product.price * item.quantity;
     }

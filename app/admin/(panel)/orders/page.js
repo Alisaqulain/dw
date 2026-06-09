@@ -197,7 +197,15 @@ export default function AdminOrdersPage() {
             <div>
               <p className="text-xs font-medium text-slate-500 mb-2">Items</p>
               {selected.items?.map((item, i) => (
-                <p key={i} className="text-sm">{item.name} × {item.quantity} — {formatPrice(item.price * item.quantity)}</p>
+                <p key={i} className="text-sm">
+                  {item.name} × {item.quantity}
+                  {(item.color || item.size) && (
+                    <span className="text-slate-500">
+                      {" "}({[item.color, item.size].filter(Boolean).join(" · ")})
+                    </span>
+                  )}
+                  {" "}— {formatPrice(item.price * item.quantity)}
+                </p>
               ))}
             </div>
 

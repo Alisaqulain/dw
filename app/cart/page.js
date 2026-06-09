@@ -28,7 +28,7 @@ export default function CartPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           {cart.map((item) => (
-            <div key={item.productId} className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-sky-100">
+            <div key={item.lineId || item.productId} className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-sky-100">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-sky-50">
                 {item.image ? (
                   <Image src={item.image} alt={item.name} fill className="object-cover" sizes="96px" />
@@ -38,14 +38,19 @@ export default function CartPage() {
               </div>
               <div className="flex flex-1 flex-col">
                 <Link href={`/products/${item.slug}`} className="font-semibold text-slate-800 hover:text-sky-600">{item.name}</Link>
+                {(item.color || item.size) && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {[item.color && `Colour: ${item.color}`, item.size && `Size: ${item.size}`].filter(Boolean).join(" · ")}
+                  </p>
+                )}
                 <p className="mt-1 text-lg font-bold text-slate-800">{formatPrice(item.price)}</p>
                 <div className="mt-auto flex items-center justify-between">
                   <div className="flex items-center rounded-lg border border-sky-100">
-                    <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} className="px-2.5 py-1 text-slate-500">−</button>
+                    <button onClick={() => updateQuantity(item.lineId || item.productId, item.quantity - 1)} className="px-2.5 py-1 text-slate-500">−</button>
                     <span className="px-3 text-sm font-medium">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.productId, item.quantity + 1)} className="px-2.5 py-1 text-slate-500">+</button>
+                    <button onClick={() => updateQuantity(item.lineId || item.productId, item.quantity + 1)} className="px-2.5 py-1 text-slate-500">+</button>
                   </div>
-                  <button onClick={() => removeFromCart(item.productId)} className="text-sm text-red-500 hover:text-red-600">Remove</button>
+                  <button onClick={() => removeFromCart(item.lineId || item.productId)} className="text-sm text-red-500 hover:text-red-600">Remove</button>
                 </div>
               </div>
             </div>

@@ -7,6 +7,8 @@ const OrderItemSchema = new mongoose.Schema({
   price: Number,
   quantity: Number,
   image: String,
+  color: { type: String, default: "" },
+  size: { type: String, default: "" },
 });
 
 const TrackingEventSchema = new mongoose.Schema({

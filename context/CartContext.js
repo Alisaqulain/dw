@@ -1,11 +1,33 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { getCartLineId } from "@/lib/productVariants";
 
 const CartContext = createContext(null);
 const CART_KEY = "trustsilcon_cart";
 const RECENT_KEY = "trustsilcon_recent";
 const NEWSLETTER_KEY = "trustsilcon_newsletter_dismissed";
+
+function normalizeCartItem(product, quantity, options = {}) {
+  const id = product._id || product.productId;
+  const color = options.color || "";
+  const size = options.size || "";
+  const lineId = getCartLineId(id, color, size);
+
+  return {
+    lineId,
+    productId: id,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    comparePrice: product.comparePrice || 0,
+    image: product.images?.[0]?.url || product.image || "",
+    quantity,
+    stock: product.stock,
+    color,
+    size,
+  };
+}
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
@@ -18,7 +40,17 @@ export function CartProvider({ children }) {
     try {
       const saved = localStorage.getItem(CART_KEY);
       const recent = localStorage.getItem(RECENT_KEY);
-      if (saved) setCart(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setCart(
+          parsed.map((item) => ({
+            ...item,
+            lineId: item.lineId || getCartLineId(item.productId, item.color, item.size),
+            color: item.color || "",
+            size: item.size || "",
+          }))
+        );
+      }
       if (recent) setRecentlyViewed(JSON.parse(recent));
     } catch {}
     setLoaded(true);
@@ -33,43 +65,36 @@ export function CartProvider({ children }) {
     return () => { document.body.style.overflow = ""; };
   }, [cartOpen, quickViewProduct]);
 
-  const addToCart = useCallback((product, quantity = 1, openDrawer = true) => {
+  const addToCart = useCallback((product, quantity = 1, options = {}, openDrawer = true) => {
+    const open = typeof options === "boolean" ? options : openDrawer;
+    const variantOptions = typeof options === "object" && options !== null ? options : {};
+    const item = normalizeCartItem(product, quantity, variantOptions);
+
     setCart((prev) => {
-      const id = product._id || product.productId;
-      const existing = prev.find((item) => item.productId === id);
+      const existing = prev.find((entry) => entry.lineId === item.lineId);
       if (existing) {
-        return prev.map((item) =>
-          item.productId === id ? { ...item, quantity: item.quantity + quantity } : item
+        return prev.map((entry) =>
+          entry.lineId === item.lineId
+            ? { ...entry, quantity: entry.quantity + quantity }
+            : entry
         );
       }
-      return [
-        ...prev,
-        {
-          productId: id,
-          name: product.name,
-          slug: product.slug,
-          price: product.price,
-          comparePrice: product.comparePrice || 0,
-          image: product.images?.[0]?.url || product.image || "",
-          quantity,
-          stock: product.stock,
-        },
-      ];
+      return [...prev, item];
     });
-    if (openDrawer) setCartOpen(true);
+    if (open) setCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId) => {
-    setCart((prev) => prev.filter((item) => item.productId !== productId));
+  const removeFromCart = useCallback((lineId) => {
+    setCart((prev) => prev.filter((item) => item.lineId !== lineId));
   }, []);
 
-  const updateQuantity = useCallback((productId, quantity) => {
+  const updateQuantity = useCallback((lineId, quantity) => {
     if (quantity <= 0) {
-      setCart((prev) => prev.filter((item) => item.productId !== productId));
+      setCart((prev) => prev.filter((item) => item.lineId !== lineId));
       return;
     }
     setCart((prev) =>
-      prev.map((item) => (item.productId === productId ? { ...item, quantity } : item))
+      prev.map((item) => (item.lineId === lineId ? { ...item, quantity } : item))
     );
   }, []);
 

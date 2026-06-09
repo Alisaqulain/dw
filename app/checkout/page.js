@@ -67,7 +67,13 @@ export default function CheckoutPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        items: cart.map((item) => ({ productId: item.productId, name: item.name, quantity: item.quantity })),
+        items: cart.map((item) => ({
+          productId: item.productId,
+          name: item.name,
+          quantity: item.quantity,
+          color: item.color || "",
+          size: item.size || "",
+        })),
         couponCode: appliedCoupon,
       }),
     });
@@ -157,9 +163,16 @@ export default function CheckoutPage() {
           <h2 className="font-bold text-slate-800">Order Summary</h2>
           <div className="mt-4 space-y-2 text-sm">
             {cart.map((item) => (
-              <div key={item.productId} className="flex justify-between">
-                <span className="text-slate-500">{item.name} × {item.quantity}</span>
-                <span>{formatPrice(item.price * item.quantity)}</span>
+              <div key={item.lineId || item.productId} className="flex justify-between gap-3">
+                <span className="text-slate-500">
+                  {item.name} × {item.quantity}
+                  {(item.color || item.size) && (
+                    <span className="block text-xs text-slate-400">
+                      {[item.color && `Colour: ${item.color}`, item.size && `Size: ${item.size}`].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0">{formatPrice(item.price * item.quantity)}</span>
               </div>
             ))}
           </div>

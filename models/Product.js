@@ -15,6 +15,8 @@ const ProductSchema = new mongoose.Schema(
     material: { type: String, default: "Medical-grade silicone" },
     size: { type: String, default: "" },
     color: { type: String, default: "" },
+    sizes: [{ type: String }],
+    colors: [{ name: String, hex: String }],
     discreetPackaging: { type: Boolean, default: true },
     featured: { type: Boolean, default: false },
     active: { type: Boolean, default: true },

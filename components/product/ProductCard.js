@@ -7,17 +7,23 @@ import { isLowStock } from "@/lib/utils";
 import Stars from "@/components/ui/Stars";
 import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
 import ProductImageSlider from "@/components/product/ProductImageSlider";
+import { productHasVariantOptions } from "@/lib/productVariants";
 
 export default function ProductCard({ product, variant = "default" }) {
   const { addToCart, setQuickViewProduct } = useCart();
   const { showToast } = useToast();
 
   const discountPercent = getDiscountPercent(product.price, product.comparePrice);
+  const hasVariants = productHasVariantOptions(product);
 
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (product.stock <= 0) { showToast("Out of stock", "error"); return; }
+    if (hasVariants) {
+      setQuickViewProduct(product);
+      return;
+    }
     addToCart(product, 1);
     showToast("Added to bag!");
   };

@@ -4,11 +4,20 @@ import { useEffect, useState } from "react";
 import { formatPrice, createSlug } from "@/lib/utils";
 import { compressImageFile } from "@/lib/clientCompress";
 import { getDiscountPercent } from "@/components/product/PriceDisplay";
+import {
+  formatColorsForInput,
+  formatSizesForInput,
+  parseColorsInput,
+  parseSizesInput,
+  getProductColors,
+  getProductSizes,
+} from "@/lib/productVariants";
 
 const emptyProduct = {
   name: "", shortDescription: "", fullDescription: "", price: "", comparePrice: "",
   stock: "", category: "Wellness", shopCollection: "For Her", tags: "", material: "Medical-grade silicone",
-  size: "", color: "", discreetPackaging: true, featured: false, active: true, bestseller: false,
+  size: "", color: "", colorsInput: "", sizesInput: "",
+  discreetPackaging: true, featured: false, active: true, bestseller: false,
   dealOfDay: false, isBundle: false, images: [],
 };
 
@@ -66,14 +75,22 @@ export default function AdminProductsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const colors = parseColorsInput(form.colorsInput);
+    const sizes = parseSizesInput(form.sizesInput);
     const payload = {
       ...form,
       price: Number(form.price),
       comparePrice: Number(form.comparePrice) || 0,
       stock: Number(form.stock),
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
+      colors,
+      sizes,
+      color: colors[0]?.name || form.color || "",
+      size: sizes[0] || form.size || "",
       slug: createSlug(form.name),
     };
+    delete payload.colorsInput;
+    delete payload.sizesInput;
 
     const url = "/api/admin/products";
     const method = editing ? "PUT" : "POST";
@@ -104,6 +121,8 @@ export default function AdminProductsPage() {
       price: product.price,
       comparePrice: product.comparePrice || "",
       stock: product.stock,
+      colorsInput: formatColorsForInput(getProductColors(product)),
+      sizesInput: formatSizesForInput(getProductSizes(product)),
     });
     setShowForm(true);
   };
@@ -150,8 +169,26 @@ export default function AdminProductsPage() {
                 </select>
               </div>
               <div><label className="text-xs text-slate-500">Material</label><input value={form.material} onChange={(e) => setForm({ ...form, material: e.target.value })} className={inputClass} /></div>
-              <div><label className="text-xs text-slate-500">Size</label><input value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} className={inputClass} /></div>
-              <div><label className="text-xs text-slate-500">Color</label><input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className={inputClass} /></div>
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-500">Colours (comma separated)</label>
+                <input
+                  value={form.colorsInput}
+                  onChange={(e) => setForm({ ...form, colorsInput: e.target.value })}
+                  placeholder="Rose, Black, Purple or Rose:#f43f5e, Black:#1a1a1a"
+                  className={inputClass}
+                />
+                <p className="mt-1 text-[10px] text-slate-400">Customers pick one colour on the product page (Amazon-style swatches).</p>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-500">Sizes (comma separated)</label>
+                <input
+                  value={form.sizesInput}
+                  onChange={(e) => setForm({ ...form, sizesInput: e.target.value })}
+                  placeholder="S, M, L, XL"
+                  className={inputClass}
+                />
+                <p className="mt-1 text-[10px] text-slate-400">Customers pick one size before adding to cart.</p>
+              </div>
               <div><label className="text-xs text-slate-500">Tags (comma separated)</label><input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className={inputClass} /></div>
               <div className="flex flex-wrap gap-4 sm:col-span-2">
                 {["discreetPackaging", "featured", "active", "bestseller", "dealOfDay", "isBundle"].map((key) => (
