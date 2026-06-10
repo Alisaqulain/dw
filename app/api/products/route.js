@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Review from "@/models/Review";
+import {
+  buildProductSearchQuery,
+  applyProductSort,
+  filterByMinRating,
+} from "@/lib/productFilters";
 
 async function attachReviewStats(products) {
   const ids = products.map((p) => p._id);
+  if (!ids.length) return products;
+
   const stats = await Review.aggregate([
     { $match: { productId: { $in: ids }, approved: true } },
     { $group: { _id: "$productId", avgRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } },
@@ -28,12 +35,15 @@ export async function GET(request) {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "";
     const collection = searchParams.get("collection") || "";
-    const minPrice = parseFloat(searchParams.get("minPrice")) || 0;
-    const maxPrice = parseFloat(searchParams.get("maxPrice")) || Infinity;
+    const minPriceRaw = searchParams.get("minPrice");
+    const maxPriceRaw = searchParams.get("maxPrice");
+    const minPrice = minPriceRaw !== null && minPriceRaw !== "" ? parseFloat(minPriceRaw) : null;
+    const maxPrice = maxPriceRaw !== null && maxPriceRaw !== "" ? parseFloat(maxPriceRaw) : null;
     const featured = searchParams.get("featured");
     const bestseller = searchParams.get("bestseller");
     const dealOfDay = searchParams.get("dealOfDay");
     const isBundle = searchParams.get("isBundle");
+    const onSale = searchParams.get("onSale");
     const inStock = searchParams.get("inStock");
     const minRating = parseFloat(searchParams.get("minRating")) || 0;
     const slug = searchParams.get("slug");
@@ -49,7 +59,9 @@ export async function GET(request) {
       return NextResponse.json({ product: enriched });
     }
 
-    if (search) query.$text = { $search: search };
+    const searchQuery = buildProductSearchQuery(search);
+    if (searchQuery) Object.assign(query, searchQuery);
+
     if (category) query.category = category;
     if (collection) query.shopCollection = collection;
     if (featured === "true") query.featured = true;
@@ -57,40 +69,40 @@ export async function GET(request) {
     if (dealOfDay === "true") query.dealOfDay = true;
     if (isBundle === "true") query.isBundle = true;
     if (inStock === "true") query.stock = { $gt: 0 };
-    if (minRating > 0) query.avgRating = { $gte: minRating };
-    query.price = { $gte: minPrice, $lte: maxPrice === Infinity ? 999999 : maxPrice };
 
-    if (sort === "sale") {
-      query.$expr = { $gt: ["$comparePrice", "$price"] };
-      query.comparePrice = { $gt: 0 };
+    if (minPrice !== null && !Number.isNaN(minPrice)) {
+      query.price = { ...(query.price || {}), $gte: minPrice };
+    }
+    if (maxPrice !== null && !Number.isNaN(maxPrice)) {
+      query.price = { ...(query.price || {}), $lte: maxPrice };
     }
 
+    const postSort = ["sale", "rating"].includes(sort);
     let sortOption = { createdAt: -1 };
     if (sort === "price-low") sortOption = { price: 1 };
     if (sort === "price-high") sortOption = { price: -1 };
     if (sort === "bestseller") sortOption = { salesCount: -1 };
-    if (sort === "rating") sortOption = { avgRating: -1 };
-    if (sort === "newest") sortOption = { createdAt: -1 };
 
-    let dbQuery = Product.find(query).sort(sortOption);
-    if (limit > 0) dbQuery = dbQuery.limit(limit);
+    let dbQuery = Product.find(query);
+    if (!postSort) dbQuery = dbQuery.sort(sortOption);
+    if (limit > 0 && !postSort && minRating <= 0) dbQuery = dbQuery.limit(limit);
 
     let products = await dbQuery.lean();
+    products = await attachReviewStats(products);
 
-    if (sort === "sale") {
-      products.sort((a, b) => {
-        const discA = a.comparePrice > a.price ? (a.comparePrice - a.price) / a.comparePrice : 0;
-        const discB = b.comparePrice > b.price ? (b.comparePrice - b.price) / b.comparePrice : 0;
-        return discB - discA;
-      });
+    if (onSale === "true" || sort === "sale") {
+      products = products.filter((p) => p.comparePrice > p.price && p.comparePrice > 0);
     }
 
-    products = await attachReviewStats(products);
+    products = filterByMinRating(products, minRating);
+    products = applyProductSort(products, sort);
+
+    if (limit > 0) products = products.slice(0, limit);
 
     const categories = await Product.distinct("category", { active: true });
     const collections = await Product.distinct("shopCollection", { active: true });
 
-    return NextResponse.json({ products, categories, collections });
+    return NextResponse.json({ products, categories, collections, total: products.length });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

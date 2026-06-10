@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/Loading";
 import Link from "next/link";
 import { COLLECTIONS } from "@/lib/constants";
 
-function FilterSidebar({ draft, setDraft, collectionOptions, onApply }) {
+function FilterSidebar({ draft, setDraft, collectionOptions, onApply, onClear }) {
   return (
     <div className="space-y-6">
       <div>
@@ -38,31 +38,131 @@ function FilterSidebar({ draft, setDraft, collectionOptions, onApply }) {
           ))}
         </div>
       </div>
+
       <div>
-        <h3 className="text-sm font-bold text-slate-800">Price Range</h3>
+        <h3 className="text-sm font-bold text-slate-800">Price Range (₹)</h3>
         <div className="mt-3 flex gap-2">
-          <input type="number" placeholder="Min" value={draft.minPrice} onChange={(e) => setDraft({ ...draft, minPrice: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-400" />
-          <input type="number" placeholder="Max" value={draft.maxPrice} onChange={(e) => setDraft({ ...draft, maxPrice: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-400" />
+          <input
+            type="number"
+            min="0"
+            placeholder="Min"
+            value={draft.minPrice}
+            onChange={(e) => setDraft({ ...draft, minPrice: e.target.value })}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-400"
+          />
+          <input
+            type="number"
+            min="0"
+            placeholder="Max"
+            value={draft.maxPrice}
+            onChange={(e) => setDraft({ ...draft, maxPrice: e.target.value })}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-400"
+          />
         </div>
       </div>
+
       <div>
         <h3 className="text-sm font-bold text-slate-800">Rating</h3>
         <div className="mt-3 space-y-2">
           {[0, 3, 4, 4.5].map((r) => (
             <label key={r} className="flex items-center gap-2 text-sm text-slate-600">
-              <input type="radio" name="rating" checked={draft.minRating === String(r)} onChange={() => setDraft({ ...draft, minRating: String(r) })} className="text-sky-500" />
+              <input
+                type="radio"
+                name="rating"
+                checked={draft.minRating === String(r)}
+                onChange={() => setDraft({ ...draft, minRating: String(r) })}
+                className="text-sky-500"
+              />
               {r === 0 ? "All Ratings" : `${r}★ & above`}
             </label>
           ))}
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-600">
-        <input type="checkbox" checked={draft.inStock} onChange={(e) => setDraft({ ...draft, inStock: e.target.checked })} className="rounded text-sky-500" />
-        In Stock Only
-      </label>
-      <button onClick={onApply} className="w-full rounded-full bg-[#0c1929] py-2.5 text-sm font-semibold text-white hover:bg-[#1e3a5f]">Apply Filters</button>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-bold text-slate-800">Quick Filters</h3>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={draft.inStock}
+            onChange={(e) => setDraft({ ...draft, inStock: e.target.checked })}
+            className="rounded text-sky-500"
+          />
+          In Stock Only
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={draft.onSale}
+            onChange={(e) => setDraft({ ...draft, onSale: e.target.checked })}
+            className="rounded text-sky-500"
+          />
+          On Sale
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={draft.featured}
+            onChange={(e) => setDraft({ ...draft, featured: e.target.checked })}
+            className="rounded text-sky-500"
+          />
+          Featured
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={draft.isBundle}
+            onChange={(e) => setDraft({ ...draft, isBundle: e.target.checked })}
+            className="rounded text-sky-500"
+          />
+          Bundles & Combos
+        </label>
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onApply}
+          className="flex-1 rounded-full bg-[#0c1929] py-2.5 text-sm font-semibold text-white hover:bg-[#1e3a5f]"
+        >
+          Apply Filters
+        </button>
+        <button
+          type="button"
+          onClick={onClear}
+          className="rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        >
+          Clear
+        </button>
+      </div>
     </div>
   );
+}
+
+function buildShopParams({
+  search = "",
+  collection = "",
+  sort = "newest",
+  minPrice = "",
+  maxPrice = "",
+  minRating = "0",
+  inStock = false,
+  onSale = false,
+  featured = false,
+  isBundle = false,
+} = {}) {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (collection) params.set("collection", collection);
+  if (sort && sort !== "newest") params.set("sort", sort);
+  if (minPrice) params.set("minPrice", minPrice);
+  if (maxPrice) params.set("maxPrice", maxPrice);
+  if (minRating && minRating !== "0") params.set("minRating", minRating);
+  if (inStock) params.set("inStock", "true");
+  if (onSale) params.set("onSale", "true");
+  if (featured) params.set("featured", "true");
+  if (isBundle) params.set("isBundle", "true");
+  return params;
 }
 
 function ShopContent() {
@@ -79,6 +179,7 @@ function ShopContent() {
   const selectedSearch = searchParams.get("search") || "";
   const selectedFeatured = searchParams.get("featured") === "true";
   const selectedIsBundle = searchParams.get("isBundle") === "true";
+  const selectedOnSale = searchParams.get("onSale") === "true";
   const selectedMinPrice = searchParams.get("minPrice") || "";
   const selectedMaxPrice = searchParams.get("maxPrice") || "";
   const selectedMinRating = searchParams.get("minRating") || "0";
@@ -90,6 +191,9 @@ function ShopContent() {
     maxPrice: selectedMaxPrice,
     minRating: selectedMinRating,
     inStock: selectedInStock,
+    onSale: selectedOnSale,
+    featured: selectedFeatured,
+    isBundle: selectedIsBundle,
   });
 
   const collectionOptions = [
@@ -106,27 +210,41 @@ function ShopContent() {
       maxPrice: selectedMaxPrice,
       minRating: selectedMinRating,
       inStock: selectedInStock,
+      onSale: selectedOnSale,
+      featured: selectedFeatured,
+      isBundle: selectedIsBundle,
     });
-  }, [selectedCollection, selectedMinPrice, selectedMaxPrice, selectedMinRating, selectedInStock]);
+  }, [
+    selectedCollection,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedMinRating,
+    selectedInStock,
+    selectedOnSale,
+    selectedFeatured,
+    selectedIsBundle,
+  ]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (selectedSearch) params.set("search", selectedSearch);
-    if (selectedCollection) params.set("collection", selectedCollection);
-    if (selectedSort) params.set("sort", selectedSort);
-    if (selectedMinPrice) params.set("minPrice", selectedMinPrice);
-    if (selectedMaxPrice) params.set("maxPrice", selectedMaxPrice);
-    if (selectedMinRating && selectedMinRating !== "0") params.set("minRating", selectedMinRating);
-    if (selectedInStock) params.set("inStock", "true");
-    if (selectedFeatured) params.set("featured", "true");
-    if (selectedIsBundle) params.set("isBundle", "true");
+    const params = buildShopParams({
+      search: selectedSearch,
+      collection: selectedCollection,
+      sort: selectedSort,
+      minPrice: selectedMinPrice,
+      maxPrice: selectedMaxPrice,
+      minRating: selectedMinRating,
+      inStock: selectedInStock,
+      onSale: selectedOnSale,
+      featured: selectedFeatured,
+      isBundle: selectedIsBundle,
+    });
 
     const res = await fetch(`/api/products?${params}`);
     const data = await res.json();
     setProducts(data.products || []);
     setApiCollections(data.collections || []);
-    setTotal((data.products || []).length);
+    setTotal(data.total ?? (data.products || []).length);
     setLoading(false);
   }, [
     selectedSearch,
@@ -136,36 +254,87 @@ function ShopContent() {
     selectedMaxPrice,
     selectedMinRating,
     selectedInStock,
+    selectedOnSale,
     selectedFeatured,
     selectedIsBundle,
   ]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
-  const applyFilters = () => {
+  const pushFilters = (overrides = {}) => {
+    const params = buildShopParams({
+      search: selectedSearch,
+      collection: draft.collection,
+      sort: selectedSort,
+      minPrice: draft.minPrice,
+      maxPrice: draft.maxPrice,
+      minRating: draft.minRating,
+      inStock: draft.inStock,
+      onSale: draft.onSale,
+      featured: draft.featured,
+      isBundle: draft.isBundle,
+      ...overrides,
+    });
+    router.push(`/shop${params.toString() ? `?${params}` : ""}`);
+  };
+
+  const applyFilters = () => pushFilters();
+
+  const clearFilters = () => {
     const params = new URLSearchParams();
-    if (draft.collection) params.set("collection", draft.collection);
-    if (selectedSort && selectedSort !== "newest") params.set("sort", selectedSort);
     if (selectedSearch) params.set("search", selectedSearch);
-    if (draft.minPrice) params.set("minPrice", draft.minPrice);
-    if (draft.maxPrice) params.set("maxPrice", draft.maxPrice);
-    if (draft.minRating && draft.minRating !== "0") params.set("minRating", draft.minRating);
-    if (draft.inStock) params.set("inStock", "true");
-    if (selectedFeatured) params.set("featured", "true");
-    if (selectedIsBundle) params.set("isBundle", "true");
     router.push(`/shop${params.toString() ? `?${params}` : ""}`);
   };
 
   const handleSortChange = (sort) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (sort && sort !== "newest") params.set("sort", sort);
-    else params.delete("sort");
+    const params = buildShopParams({
+      search: selectedSearch,
+      collection: selectedCollection,
+      sort,
+      minPrice: selectedMinPrice,
+      maxPrice: selectedMaxPrice,
+      minRating: selectedMinRating,
+      inStock: selectedInStock,
+      onSale: selectedOnSale,
+      featured: selectedFeatured,
+      isBundle: selectedIsBundle,
+    });
     router.push(`/shop${params.toString() ? `?${params}` : ""}`);
   };
 
-  const pageTitle =
-    selectedCollection ||
-    (selectedFeatured ? "Featured" : selectedIsBundle ? "Bundles" : "All Products");
+  const pageTitle = selectedSearch
+    ? `Results for "${selectedSearch}"`
+    : selectedCollection ||
+      (selectedOnSale ? "On Sale" : selectedFeatured ? "Featured" : selectedIsBundle ? "Bundles" : "All Products");
+
+  const activeFilters = [
+    selectedCollection && { key: "collection", label: selectedCollection },
+    selectedMinPrice && { key: "minPrice", label: `Min ₹${selectedMinPrice}` },
+    selectedMaxPrice && { key: "maxPrice", label: `Max ₹${selectedMaxPrice}` },
+    selectedMinRating !== "0" && { key: "minRating", label: `${selectedMinRating}★+` },
+    selectedInStock && { key: "inStock", label: "In Stock" },
+    selectedOnSale && { key: "onSale", label: "On Sale" },
+    selectedFeatured && { key: "featured", label: "Featured" },
+    selectedIsBundle && { key: "isBundle", label: "Bundles" },
+  ].filter(Boolean);
+
+  const removeFilter = (key) => {
+    const params = buildShopParams({
+      search: selectedSearch,
+      collection: key === "collection" ? "" : selectedCollection,
+      sort: selectedSort,
+      minPrice: key === "minPrice" ? "" : selectedMinPrice,
+      maxPrice: key === "maxPrice" ? "" : selectedMaxPrice,
+      minRating: key === "minRating" ? "0" : selectedMinRating,
+      inStock: key === "inStock" ? false : selectedInStock,
+      onSale: key === "onSale" ? false : selectedOnSale,
+      featured: key === "featured" ? false : selectedFeatured,
+      isBundle: key === "isBundle" ? false : selectedIsBundle,
+    });
+    router.push(`/shop${params.toString() ? `?${params}` : ""}`);
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -176,8 +345,14 @@ function ShopContent() {
           <p className="mt-1 text-sm text-slate-500">{total} products</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          <button onClick={() => setFilterOpen(true)} className="flex min-h-[44px] items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-50 lg:hidden">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+          <button
+            type="button"
+            onClick={() => setFilterOpen(true)}
+            className="flex min-h-[44px] items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-50 lg:hidden"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
             Filters
           </button>
           <select
@@ -195,19 +370,60 @@ function ShopContent() {
         </div>
       </div>
 
+      {activeFilters.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {activeFilters.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => removeFilter(f.key)}
+              className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-100"
+            >
+              {f.label}
+              <span aria-hidden="true">×</span>
+            </button>
+          ))}
+          <button type="button" onClick={clearFilters} className="text-xs font-medium text-slate-500 hover:text-sky-600">
+            Clear all
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {COLLECTIONS.map((col) => {
           const colParam = col.href.includes("collection=")
             ? decodeURIComponent(col.href.split("collection=")[1]?.split("&")[0] || "")
             : "";
+          const sortParam = col.href.includes("sort=")
+            ? col.href.split("sort=")[1]?.split("&")[0]
+            : "";
           const isActive = colParam
-            ? selectedCollection === colParam
-            : col.href.includes("sort=") && selectedSort === col.href.split("sort=")[1]?.split("&")[0];
+            ? selectedCollection === colParam && !selectedOnSale && !selectedFeatured && !selectedIsBundle
+            : sortParam
+              ? selectedSort === sortParam && searchParams.has("sort")
+              : false;
+
+          const chipParams = buildShopParams({
+            search: selectedSearch,
+            collection: colParam || "",
+            sort: sortParam || selectedSort,
+            minPrice: selectedMinPrice,
+            maxPrice: selectedMaxPrice,
+            minRating: selectedMinRating,
+            inStock: selectedInStock,
+            onSale: selectedOnSale,
+            featured: selectedFeatured,
+            isBundle: selectedIsBundle,
+          });
+          if (sortParam === "newest") chipParams.set("sort", "newest");
+
           return (
             <Link
               key={col.slug}
-              href={col.href}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${isActive ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-600"}`}
+              href={`/shop?${chipParams}`}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
+                isActive ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+              }`}
             >
               {col.icon} {col.label}
             </Link>
@@ -223,6 +439,7 @@ function ShopContent() {
               setDraft={setDraft}
               collectionOptions={collectionOptions}
               onApply={applyFilters}
+              onClear={clearFilters}
             />
           </div>
         </aside>
@@ -231,10 +448,24 @@ function ShopContent() {
           {loading ? (
             <ProductGridSkeleton count={8} />
           ) : products.length === 0 ? (
-            <EmptyState title="No products found" description="Try adjusting your filters." action={<Link href="/shop" className="rounded-full bg-sky-500 px-6 py-2.5 text-sm font-semibold text-white">Clear Filters</Link>} />
+            <EmptyState
+              title="No products found"
+              description="Try adjusting your filters or search terms."
+              action={
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="rounded-full bg-sky-500 px-6 py-2.5 text-sm font-semibold text-white"
+                >
+                  Clear Filters
+                </button>
+              }
+            />
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-3">
-              {products.map((p) => <ProductCard key={p._id} product={p} />)}
+              {products.map((p) => (
+                <ProductCard key={p._id} product={p} />
+              ))}
             </div>
           )}
         </div>
@@ -246,13 +477,22 @@ function ShopContent() {
           <div className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] animate-slide-up lg:hidden">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold">Filters</h3>
-              <button onClick={() => setFilterOpen(false)} className="text-slate-400">✕</button>
+              <button type="button" onClick={() => setFilterOpen(false)} className="text-slate-400">
+                ✕
+              </button>
             </div>
             <FilterSidebar
               draft={draft}
               setDraft={setDraft}
               collectionOptions={collectionOptions}
-              onApply={() => { applyFilters(); setFilterOpen(false); }}
+              onApply={() => {
+                applyFilters();
+                setFilterOpen(false);
+              }}
+              onClear={() => {
+                clearFilters();
+                setFilterOpen(false);
+              }}
             />
           </div>
         </>
