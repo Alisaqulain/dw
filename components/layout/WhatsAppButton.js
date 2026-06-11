@@ -1,19 +1,26 @@
 "use client";
 
 import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
-import { getWhatsAppDisplay, getWhatsAppUrl } from "@/lib/whatsapp";
+import { getWhatsAppContacts, getWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function WhatsAppButton() {
+  const contacts = getWhatsAppContacts();
+
   return (
-    <a
-      href={getWhatsAppUrl()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] left-4 z-40 flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-2.5 text-white shadow-lg shadow-emerald-200 transition hover:scale-105 hover:bg-emerald-600 lg:bottom-6 lg:left-6 lg:z-50 lg:px-4 lg:py-3"
-      aria-label={`WhatsApp ${getWhatsAppDisplay()}`}
-    >
-      <WhatsAppIcon className="h-6 w-6 shrink-0 lg:h-7 lg:w-7" />
-      <span className="text-xs font-semibold leading-none sm:text-sm">{getWhatsAppDisplay()}</span>
-    </a>
+    <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-3 z-30 flex flex-col gap-1 lg:bottom-5 lg:right-5 lg:z-40">
+      {contacts.map((contact) => (
+        <a
+          key={contact.number}
+          href={getWhatsAppUrl("Hi TrustSilcon, I need help with my order.", contact.number)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-1.5 text-white shadow-md shadow-emerald-200/80 transition hover:bg-emerald-600 lg:px-3 lg:py-2"
+          aria-label={`WhatsApp ${contact.display}`}
+        >
+          <WhatsAppIcon className="h-4 w-4 shrink-0 lg:h-[18px] lg:w-[18px]" />
+          <span className="text-[10px] font-semibold leading-none sm:text-[11px]">{contact.short}</span>
+        </a>
+      ))}
+    </div>
   );
 }

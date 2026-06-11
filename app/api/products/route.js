@@ -63,7 +63,10 @@ export async function GET(request) {
     if (searchQuery) Object.assign(query, searchQuery);
 
     if (category) query.category = category;
-    if (collection) query.shopCollection = collection;
+    if (collection) {
+      const escaped = collection.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.shopCollection = { $regex: new RegExp(`^${escaped}$`, "i") };
+    }
     if (featured === "true") query.featured = true;
     if (bestseller === "true") query.bestseller = true;
     if (dealOfDay === "true") query.dealOfDay = true;

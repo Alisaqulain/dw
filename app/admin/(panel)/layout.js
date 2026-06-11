@@ -1,10 +1,5 @@
-import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default function AdminSectionLayout({ children }) {
-  return (
-    <div className="flex min-h-screen bg-slate-100">
-      <AdminSidebar />
-      <main className="flex-1 overflow-auto p-6 lg:p-8">{children}</main>
-    </div>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }
