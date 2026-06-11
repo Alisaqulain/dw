@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "admin:reset-password": "node scripts/reset-admin-password.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.4.0",
