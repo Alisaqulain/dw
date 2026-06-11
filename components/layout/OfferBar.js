@@ -2,8 +2,10 @@
 
 import { STORE_CONTACT } from "@/lib/constants";
 
+const phoneLine = STORE_CONTACT.phones.map((p) => p.display).join(" / ");
+
 const OFFER_ITEMS = [
-  `📞 ${STORE_CONTACT.phones[0]?.display || ""}`,
+  `📞 ${phoneLine}`,
   `✉ ${STORE_CONTACT.email}`,
   "🔥 Hot Sale — Up to 40% Off",
   "📦 Discreet Delivery Across India",
@@ -19,9 +21,14 @@ export default function OfferBar() {
       <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(14,165,233,0.08),transparent)]" />
       {/* Mobile: static real contact info */}
       <div className="relative hidden items-center justify-center gap-3 px-4 py-2.5 text-center text-[11px] font-medium sm:flex sm:text-xs">
-        <a href={`tel:${STORE_CONTACT.phones[0]?.tel}`} className="hover:text-sky-300">
-          📞 {STORE_CONTACT.phones[0]?.display}
-        </a>
+        {STORE_CONTACT.phones.map((phone, i) => (
+          <span key={phone.tel} className="inline-flex items-center gap-3">
+            {i > 0 && <span className="text-white/30">/</span>}
+            <a href={`tel:${phone.tel}`} className="hover:text-sky-300">
+              📞 {phone.display}
+            </a>
+          </span>
+        ))}
         <span className="text-white/30">|</span>
         <a href={`mailto:${STORE_CONTACT.email}`} className="hover:text-sky-300">
           ✉ {STORE_CONTACT.email}
