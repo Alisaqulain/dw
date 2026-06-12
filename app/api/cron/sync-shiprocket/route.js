@@ -3,12 +3,12 @@ import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import { isShiprocketConfigured, syncOrderTracking } from "@/lib/shiprocket";
 
-export async function GET(request) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
+import { verifyCronRequest } from "@/lib/cronAuth";
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(request) {
+  const auth = verifyCronRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   if (!isShiprocketConfigured()) {

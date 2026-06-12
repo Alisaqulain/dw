@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import EmailSubscriber from "@/models/EmailSubscriber";
 import { sendMarketingEmail } from "@/lib/email";
+import { verifyCronRequest } from "@/lib/cronAuth";
 
 const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
 
 export async function GET(request) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = verifyCronRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {

@@ -13,16 +13,9 @@ export async function POST(request) {
 
     await connectDB();
 
-    // Auto-create admin from env if none exists
     let admin = await Admin.findOne({ email: email.toLowerCase() });
     if (!admin) {
-      const envEmail = process.env.ADMIN_EMAIL;
-      const envPassword = process.env.ADMIN_PASSWORD;
-      if (envEmail && envPassword && email.toLowerCase() === envEmail.toLowerCase() && password === envPassword) {
-        admin = await Admin.create({ email: envEmail.toLowerCase(), password: envPassword, name: "Admin" });
-      } else {
-        return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-      }
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     } else {
       const isValid = await admin.comparePassword(password);
       if (!isValid) {
