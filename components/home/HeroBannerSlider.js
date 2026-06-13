@@ -4,10 +4,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BANNER_SLIDES } from "@/lib/constants";
+import { HERO_SLIDE_KEYS } from "@/lib/i18n/translations";
+import { useLanguage } from "@/context/LanguageContext";
 
 const INTERVAL_MS = 5500;
 
 export default function HeroBannerSlider() {
+  const { t } = useLanguage();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -46,6 +49,7 @@ export default function HeroBannerSlider() {
   };
 
   const slide = BANNER_SLIDES[active];
+  const slideText = HERO_SLIDE_KEYS[slide.id];
 
   return (
     <section
@@ -80,23 +84,23 @@ export default function HeroBannerSlider() {
           <div key={slide.id} className="max-w-2xl animate-banner-content">
             <span className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white ${slide.accent} shadow-lg`}>
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-              {slide.badge}
+              {slideText ? t(slideText.badge) : slide.badge}
             </span>
             <h1 className="mt-4 text-3xl font-bold leading-[1.15] text-white sm:mt-5 sm:text-5xl lg:text-6xl">
-              {slide.title}
+              {slideText ? t(slideText.title) : slide.title}
               <span className="mt-1 block bg-gradient-to-r from-white via-sky-100 to-cyan-200 bg-clip-text text-transparent">
-                {slide.highlight}
+                {slideText ? t(slideText.highlight) : slide.highlight}
               </span>
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/85 sm:mt-4 sm:text-lg">
-              {slide.description}
+              {slideText ? t(slideText.description) : slide.description}
             </p>
             <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
                 href={slide.href}
                 className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#0c1929] shadow-xl transition active:scale-[0.98] sm:px-8 sm:py-3.5"
               >
-                {slide.cta}
+                {slideText ? t(slideText.cta) : slide.cta}
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -105,7 +109,7 @@ export default function HeroBannerSlider() {
                 href="/shop"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition active:bg-white/20 sm:px-8 sm:py-3.5"
               >
-                Browse All
+                {t("shopAllProducts")}
               </Link>
             </div>
           </div>

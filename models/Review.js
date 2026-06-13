@@ -7,6 +7,7 @@ const ReviewSchema = new mongoose.Schema(
     review: { type: String, required: true },
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
     orderNumber: { type: String, default: "" },
+    verifiedBuyer: { type: Boolean, default: false },
     approved: { type: Boolean, default: false },
   },
   { timestamps: true }

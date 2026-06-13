@@ -9,9 +9,12 @@ import MegaMenu from "@/components/layout/MegaMenu";
 import { useCart } from "@/context/CartContext";
 import { COLLECTIONS } from "@/lib/constants";
 import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
-import { getWhatsAppContacts, getWhatsAppUrl } from "@/lib/whatsapp";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
+import { getWhatsAppNumber, getWhatsAppUrl } from "@/lib/whatsapp";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Header() {
+  const { t } = useLanguage();
   const { cartCount, openCart } = useCart();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -72,7 +75,7 @@ export default function Header() {
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search wellness products..."
+                  placeholder={t("searchPlaceholder")}
                   className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-5 pr-12 text-sm outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100"
                 />
                 <button type="submit" className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#0c1929] text-white hover:bg-[#1e3a5f]">
@@ -82,6 +85,7 @@ export default function Header() {
             </form>
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
+              <LanguageSwitcher />
               <button
                 type="button"
                 onClick={() => setSearchOpen(!searchOpen)}
@@ -90,21 +94,20 @@ export default function Header() {
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
-              {getWhatsAppContacts().map((contact) => (
+              {getWhatsAppNumber() && (
                 <a
-                  key={contact.number}
-                  href={getWhatsAppUrl("Hi TrustSilcon!", contact.number)}
+                  href={getWhatsAppUrl("Hi TrustSilcon, I want to order/enquire about your wellness products.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 md:flex"
                 >
                   <WhatsAppIcon className="h-4 w-4" />
-                  <span className="hidden lg:inline">{contact.short}</span>
+                  <span className="hidden lg:inline">WhatsApp</span>
                 </a>
-              ))}
+              )}
               <Link href="/track-order" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600 md:flex">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                Track
+                {t("track")}
               </Link>
               <button
                 type="button"
@@ -128,7 +131,7 @@ export default function Header() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
+                  placeholder={t("searchProducts")}
                   className="w-full rounded-full border border-slate-200 bg-slate-50 py-3 pl-4 pr-11 text-base outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
                 />
                 <button type="submit" className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#0c1929] text-white">
@@ -144,11 +147,11 @@ export default function Header() {
               onClick={() => setMegaOpen(!megaOpen)}
               className={`flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition ${megaOpen ? "bg-sky-50 text-sky-600" : "text-slate-700 hover:bg-slate-50"}`}
             >
-              Shop All
+              {t("shopAll")}
               <svg className={`h-4 w-4 transition ${megaOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
             <Link href="/collections" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
-              Collections
+              {t("collections")}
             </Link>
             {COLLECTIONS.slice(0, 5).map((col) => (
               <Link key={col.slug} href={col.href} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
@@ -156,7 +159,7 @@ export default function Header() {
               </Link>
             ))}
             <Link href="/blog" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-sky-50 hover:text-sky-600">
-              Guides
+              {t("guides")}
             </Link>
           </nav>
         </div>
@@ -178,9 +181,9 @@ export default function Header() {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4">
               <Link href="/shop" onClick={() => setMenuOpen(false)} className="mb-4 flex items-center justify-center rounded-2xl bg-[#0c1929] py-3.5 text-sm font-bold text-white">
-                Shop All Products
+                {t("shopAllProducts")}
               </Link>
-              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">Collections</p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t("collections")}</p>
               <div className="space-y-2">
                 {COLLECTIONS.map((col) => (
                   <Link
@@ -198,28 +201,26 @@ export default function Header() {
                 ))}
               </div>
               <div className="mt-6 space-y-2">
-                {getWhatsAppContacts().map((contact) => (
-                  <a
-                    key={contact.number}
-                    href={getWhatsAppUrl("Hi TrustSilcon!", contact.number)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-bold text-white"
-                  >
-                    <WhatsAppIcon className="h-5 w-5" />
-                    WhatsApp {contact.short}
-                  </a>
-                ))}
+                <LanguageSwitcher className="w-full justify-center" />
+                <a
+                  href={getWhatsAppUrl("Hi TrustSilcon, I want to order/enquire about your wellness products.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-bold text-white"
+                >
+                  <WhatsAppIcon className="h-5 w-5" />
+                  {t("whatsappSupport")}
+                </a>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
                 {[
-                  { href: "/collections", label: "Collections" },
-                  { href: "/blog", label: "Guides" },
-                  { href: "/track-order", label: "Track Order" },
-                  { href: "/contact", label: "Contact" },
-                  { href: "/faq", label: "FAQ" },
-                  { href: "/about", label: "About" },
+                  { href: "/collections", label: t("collections") },
+                  { href: "/blog", label: t("guides") },
+                  { href: "/track-order", label: t("trackOrder") },
+                  { href: "/contact", label: t("contact") },
+                  { href: "/faq", label: t("faq") },
+                  { href: "/about", label: t("about") },
                 ].map((link) => (
                   <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl border border-slate-200 py-2.5 text-center text-xs font-semibold text-slate-600">
                     {link.label}

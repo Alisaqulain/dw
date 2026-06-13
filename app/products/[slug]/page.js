@@ -1,32 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ProductImageSlider, { getValidImages } from "@/components/product/ProductImageSlider";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useWhatsAppContext } from "@/context/WhatsAppContext";
 import ProductCard from "@/components/product/ProductCard";
 import { PageLoader } from "@/components/ui/Loading";
 import Stars from "@/components/ui/Stars";
 import PriceDisplay, { getDiscountPercent } from "@/components/product/PriceDisplay";
+import TrustBadges, { CodBadge } from "@/components/ui/TrustBadges";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
 import { formatPrice, isLowStock, validatePincode } from "@/lib/utils";
 import VariantSelector, { validateVariantSelection } from "@/components/product/VariantSelector";
 import { getProductColors, getProductSizes } from "@/lib/productVariants";
 import { trackViewContent } from "@/lib/metaPixel";
-
-const TABS = ["Description", "Material & Care", "Shipping", "Reviews", "FAQ"];
+import { trackProductView } from "@/lib/analytics";
+import { getWhatsAppUrl, getProductWhatsAppMessage } from "@/lib/whatsapp";
 
 const PRODUCT_FAQ = [
   { q: "Is this product body-safe?", a: "Yes, all TrustSilcon products use medical-grade, non-toxic silicone." },
   { q: "How do I clean it?", a: "Wash with warm water and mild soap before and after each use. Pat dry and store in a clean pouch." },
   { q: "Is packaging discreet?", a: "Every order ships in a plain, unmarked box with no product details visible." },
+  { q: "Is COD available?", a: "Yes! Pay cash on delivery when your order arrives. No online payment required." },
 ];
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
+  const router = useRouter();
   const { addToCart, addRecentlyViewed } = useCart();
   const { showToast } = useToast();
+  const { t, lang } = useLanguage();
+  const { setProductName, clearProduct } = useWhatsAppContext();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -40,6 +48,8 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
 
+  const TABS = [t("description"), t("materialCare"), t("shipping"), t("reviews"), t("faq")];
+
   useEffect(() => {
     async function load() {
       setGalleryIndex(0);
@@ -49,6 +59,7 @@ export default function ProductDetailPage() {
       const data = await res.json();
       if (data.product) {
         setProduct(data.product);
+        setProductName(data.product.name);
         const colors = getProductColors(data.product);
         const sizes = getProductSizes(data.product);
         if (colors.length === 1) setSelectedColor(colors[0].name);
@@ -67,23 +78,40 @@ export default function ProductDetailPage() {
       setLoading(false);
     }
     load();
-  }, [slug, addRecentlyViewed]);
+    return () => clearProduct();
+  }, [slug, addRecentlyViewed, setProductName, clearProduct]);
 
   useEffect(() => {
-    if (product) trackViewContent(product);
+    if (product) {
+      trackViewContent(product);
+      trackProductView(product);
+    }
   }, [product]);
+
+  const displayName = product && lang === "hi" && product.nameHi ? product.nameHi : product?.name;
 
   const checkPincode = () => {
     if (!validatePincode(pincode)) { setDeliveryMsg("Please enter a valid 6-digit pincode"); return; }
     setDeliveryMsg(`✓ Delivery available to ${pincode}. Estimated 3–5 business days in discreet packaging.`);
   };
 
-  const handleAdd = () => {
-    if (product.stock <= 0) { showToast("Out of stock", "error"); return; }
+  const validateAndAdd = () => {
+    if (product.stock <= 0) { showToast("Out of stock", "error"); return false; }
     const variantError = validateVariantSelection(product, selectedColor, selectedSize);
-    if (variantError) { showToast(variantError, "error"); return; }
+    if (variantError) { showToast(variantError, "error"); return false; }
+    return true;
+  };
+
+  const handleAdd = () => {
+    if (!validateAndAdd()) return;
     addToCart(product, quantity, { color: selectedColor, size: selectedSize });
     showToast("Added to bag!");
+  };
+
+  const handleBuyNow = () => {
+    if (!validateAndAdd()) return;
+    addToCart(product, quantity, { color: selectedColor, size: selectedSize }, false);
+    router.push("/checkout");
   };
 
   if (loading) return <PageLoader />;
@@ -96,31 +124,41 @@ export default function ProductDetailPage() {
 
   const discount = getDiscountPercent(product.price, product.comparePrice);
   const galleryImages = getValidImages(product.images);
+  const whatsappMsg = getProductWhatsAppMessage(product.name);
 
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-        <p className="text-xs text-slate-400"><Link href="/" className="hover:text-sky-500">Home</Link> / <Link href="/shop" className="hover:text-sky-500">Shop</Link> / <span className="text-slate-600">{product.name}</span></p>
+        <p className="text-xs text-slate-400">
+          <Link href="/" className="hover:text-sky-500">{t("home")}</Link> / <Link href="/shop" className="hover:text-sky-500">{t("shop")}</Link> / <span className="text-slate-600">{displayName}</span>
+        </p>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* Gallery */}
           <div>
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-sky-50 ring-1 ring-slate-100">
               <ProductImageSlider
                 images={product.images}
-                alt={product.name}
+                alt={displayName}
                 sizes="(max-width:768px) 100vw, 50vw"
                 variant="detail"
                 className="h-full w-full"
                 index={galleryIndex}
                 onIndexChange={setGalleryIndex}
                 badge={
-                  discount > 0 ? (
-                    <span className="absolute left-4 top-4 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>
-                  ) : null
+                  <>
+                    {discount > 0 && (
+                      <span className="absolute left-4 top-4 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">{discount}% OFF</span>
+                    )}
+                    <span className="absolute right-4 top-4 z-20"><CodBadge /></span>
+                  </>
                 }
               />
             </div>
+            {product.videoUrl && (
+              <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-100">
+                <video src={product.videoUrl} controls playsInline preload="none" className="w-full" poster={galleryImages[0]?.url} />
+              </div>
+            )}
             {galleryImages.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-hide">
                 {galleryImages.map((img, i) => (
@@ -130,22 +168,22 @@ export default function ProductDetailPage() {
                     onClick={() => setGalleryIndex(i)}
                     className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 ${galleryIndex === i ? "ring-sky-500" : "ring-slate-100"}`}
                   >
-                    <img src={img.url} alt="" className="h-full w-full object-cover" />
+                    <img src={img.url} alt="" className="h-full w-full object-cover" loading="lazy" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Info */}
           <div className="lg:sticky lg:top-36 lg:self-start">
             <p className="text-xs font-bold uppercase tracking-widest text-sky-500">{product.shopCollection || product.category}</p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
-            <div className="mt-3 flex items-center gap-3">
+            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{displayName}</h1>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <Stars rating={avgRating || 5} size="md" showValue alwaysShow />
               <span className="text-sm text-slate-500">
-                {reviews.length > 0 ? `(${reviews.length} reviews)` : "(5.0 rating)"}
+                {reviews.length > 0 ? `(${reviews.length} ${t("reviews").toLowerCase()})` : "(5.0 rating)"}
               </span>
+              <CodBadge />
             </div>
             <div className="mt-4">
               <PriceDisplay price={product.price} originalPrice={product.comparePrice} size="lg" />
@@ -153,16 +191,15 @@ export default function ProductDetailPage() {
             <p className="mt-4 text-slate-600">{product.shortDescription}</p>
 
             <div className="mt-4 rounded-xl bg-sky-50 p-4 ring-1 ring-sky-100">
-              <p className="text-xs font-semibold text-sky-700">📦 Discreet Delivery</p>
-              <p className="mt-1 text-xs text-sky-600">Plain packaging · No product labels · Private billing on statement</p>
+              <p className="text-xs font-semibold text-sky-700">📦 {t("discreetDelivery")}</p>
+              <p className="mt-1 text-xs text-sky-600">{t("discreetDeliveryDesc")}</p>
             </div>
 
-            {/* Pincode checker */}
             <div className="mt-4">
-              <label className="text-xs font-semibold text-slate-700">Check Delivery</label>
+              <label className="text-xs font-semibold text-slate-700">{t("checkDelivery")}</label>
               <div className="mt-1.5 flex gap-2">
-                <input value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="Enter pincode" maxLength={6} className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-sky-400" />
-                <button onClick={checkPincode} className="rounded-xl bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">Check</button>
+                <input value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder={t("enterPincode")} maxLength={6} className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-sky-400" />
+                <button onClick={checkPincode} className="rounded-xl bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">{t("check")}</button>
               </div>
               {deliveryMsg && <p className="mt-2 text-xs text-emerald-600">{deliveryMsg}</p>}
             </div>
@@ -174,37 +211,45 @@ export default function ProductDetailPage() {
             )}
 
             <div className="mt-5">
-              <VariantSelector
-                product={product}
-                selectedColor={selectedColor}
-                selectedSize={selectedSize}
-                onColorChange={setSelectedColor}
-                onSizeChange={setSelectedSize}
-              />
+              <VariantSelector product={product} selectedColor={selectedColor} selectedSize={selectedSize} onColorChange={setSelectedColor} onSizeChange={setSelectedSize} />
             </div>
 
             {product.stock <= 0 ? (
-              <span className="mt-4 inline-block rounded-full bg-red-100 px-4 py-1.5 text-sm font-medium text-red-600">Out of Stock</span>
+              <span className="mt-4 inline-block rounded-full bg-red-100 px-4 py-1.5 text-sm font-medium text-red-600">{t("outOfStock")}</span>
             ) : isLowStock(product.stock) ? (
-              <span className="mt-4 inline-block rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600">Only {product.stock} left — order soon!</span>
+              <span className="mt-4 inline-block rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600">{t("onlyLeft", { count: product.stock })}</span>
             ) : (
-              <span className="mt-4 inline-block rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-600">✓ In Stock</span>
+              <span className="mt-4 inline-block rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-600">✓ {t("inStock")}</span>
             )}
 
-            <div className="mt-6 hidden items-center gap-4 sm:flex">
+            <div className="mt-6 hidden items-center gap-3 sm:flex">
               <div className="flex items-center rounded-full border border-slate-200">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2.5 text-slate-500">−</button>
                 <span className="min-w-[40px] text-center font-semibold">{quantity}</span>
                 <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="px-4 py-2.5 text-slate-500">+</button>
               </div>
               <button onClick={handleAdd} disabled={product.stock <= 0} className="flex-1 rounded-full bg-[#0c1929] py-3.5 font-semibold text-white hover:bg-[#1e3a5f] disabled:opacity-50">
-                Add to Bag
+                {t("addToBag")}
+              </button>
+              <button onClick={handleBuyNow} disabled={product.stock <= 0} className="flex-1 rounded-full bg-emerald-500 py-3.5 font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                {t("buyNow")}
               </button>
             </div>
+
+            <a
+              href={getWhatsAppUrl(whatsappMsg)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 hidden w-full items-center justify-center gap-2 rounded-full border-2 border-emerald-500 py-3.5 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 sm:flex"
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+              {t("orderOnWhatsApp")}
+            </a>
+
+            <TrustBadges variant="compact" className="mt-5 hidden sm:grid" />
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="mt-12">
           <div className="flex gap-1 overflow-x-auto border-b border-slate-200 scrollbar-hide">
             {TABS.map((tab, i) => (
@@ -226,26 +271,28 @@ export default function ProductDetailPage() {
               <div className="space-y-3 text-sm text-slate-600">
                 <p>• Free delivery on orders above ₹999</p>
                 <p>• Standard delivery: ₹79 (3–7 business days)</p>
-                <p>• Discreet plain packaging on every order</p>
-                <p>• Track your order at <Link href="/track-order" className="text-sky-500">Track Order</Link></p>
+                <p>• Discreet plain packaging on every order · COD available</p>
+                <p>• Track your order at <Link href="/track-order" className="text-sky-500">{t("trackOrder")}</Link></p>
               </div>
             )}
             {activeTab === 3 && (
               <div className="space-y-4">
                 {reviews.length === 0 ? <p className="text-sm text-slate-500">No reviews yet.</p> : reviews.map((r) => (
                   <div key={r._id} className="rounded-2xl bg-slate-50 p-5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">{r.name}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{r.name}</span>
+                        {r.verifiedBuyer && (
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">{t("verifiedBuyer")}</span>
+                        )}
+                      </div>
                       <Stars rating={r.rating} size="sm" alwaysShow />
                     </div>
                     <p className="mt-2 text-sm text-slate-600">{r.review}</p>
                   </div>
                 ))}
-                <Link
-                  href={`/reviews?productId=${product._id}#write-review`}
-                  className="inline-block text-sm font-medium text-sky-500 hover:text-sky-600"
-                >
-                  Write a review →
+                <Link href={`/reviews?productId=${product._id}#write-review`} className="inline-block text-sm font-medium text-sky-500 hover:text-sky-600">
+                  {t("writeReview")} →
                 </Link>
               </div>
             )}
@@ -262,27 +309,40 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
+        <TrustBadges variant="compact" className="mt-4 sm:hidden" />
+
         {related.length > 0 && (
           <div className="mt-8 border-t border-slate-100 pt-12">
-            <h2 className="text-xl font-bold text-slate-900">You May Also Like</h2>
+            <h2 className="text-xl font-bold text-slate-900">{t("youMayAlsoLike")}</h2>
             <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">{related.map((p) => <ProductCard key={p._id} product={p} />)}</div>
           </div>
         )}
       </div>
 
-      {/* Sticky mobile add to cart */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white p-4 shadow-lg sm:hidden">
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="text-lg font-bold text-slate-900">{formatPrice(product.price)}</p>
-            {discount > 0 && <p className="text-xs text-red-500">{discount}% off</p>}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white p-3 shadow-lg sm:hidden">
+        <div className="flex items-center gap-2">
+          <div className="shrink-0">
+            <p className="text-base font-bold text-slate-900">{formatPrice(product.price)}</p>
+            {discount > 0 && <p className="text-[10px] text-red-500">{discount}% off</p>}
           </div>
-          <button onClick={handleAdd} disabled={product.stock <= 0} className="flex-1 rounded-full bg-[#0c1929] py-3.5 text-sm font-semibold text-white disabled:opacity-50">
-            Add to Bag
+          <a
+            href={getWhatsAppUrl(whatsappMsg)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-600"
+            aria-label={t("orderOnWhatsApp")}
+          >
+            <WhatsAppIcon className="h-5 w-5" />
+          </a>
+          <button onClick={handleAdd} disabled={product.stock <= 0} className="flex-1 rounded-full bg-[#0c1929] py-3 text-sm font-semibold text-white disabled:opacity-50">
+            {t("addToBag")}
+          </button>
+          <button onClick={handleBuyNow} disabled={product.stock <= 0} className="flex-1 rounded-full bg-emerald-500 py-3 text-sm font-semibold text-white disabled:opacity-50">
+            {t("buyNow")}
           </button>
         </div>
       </div>
-      <div className="h-20 sm:hidden" />
+      <div className="h-[4.5rem] sm:hidden" />
     </>
   );
 }

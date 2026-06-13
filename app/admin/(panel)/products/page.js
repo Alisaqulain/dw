@@ -14,9 +14,9 @@ import {
 } from "@/lib/productVariants";
 
 const emptyProduct = {
-  name: "", shortDescription: "", fullDescription: "", price: "", comparePrice: "",
+  name: "", nameHi: "", shortDescription: "", fullDescription: "", price: "", comparePrice: "",
   stock: "", category: "Wellness", shopCollection: "For Her", tags: "", material: "Medical-grade silicone",
-  size: "", color: "", colorsInput: "", sizesInput: "",
+  size: "", color: "", colorsInput: "", sizesInput: "", videoUrl: "",
   discreetPackaging: true, featured: false, active: true, bestseller: false,
   dealOfDay: false, isBundle: false, images: [],
 };
@@ -150,6 +150,8 @@ export default function AdminProductsPage() {
             <h2 className="text-lg font-bold">{editing ? "Edit Product" : "Add Product"}</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Name *</label><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} /></div>
+              <div className="sm:col-span-2"><label className="text-xs text-slate-500">Hindi Name (optional)</label><input value={form.nameHi || ""} onChange={(e) => setForm({ ...form, nameHi: e.target.value })} className={inputClass} placeholder="हिंदी में उत्पाद का नाम" /></div>
+              <div className="sm:col-span-2"><label className="text-xs text-slate-500">Product Video URL (optional)</label><input value={form.videoUrl || ""} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })} className={inputClass} placeholder="https://...mp4 or Vercel Blob URL" /></div>
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Short Description *</label><input required value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} className={inputClass} /></div>
               <div className="sm:col-span-2"><label className="text-xs text-slate-500">Full Description *</label><textarea required rows={3} value={form.fullDescription} onChange={(e) => setForm({ ...form, fullDescription: e.target.value })} className={inputClass} /></div>
               <div><label className="text-xs text-slate-500">Sale Price (₹) *</label><input required type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={inputClass} placeholder="1299" /></div>

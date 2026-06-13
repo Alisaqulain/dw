@@ -5,21 +5,26 @@ import Link from "next/link";
 import { RevealSection } from "@/hooks/useReveal";
 import FAQAccordion from "@/components/legal/FAQAccordion";
 import { FAQ_ITEMS } from "@/lib/faq";
+import { getFaqItems } from "@/lib/i18n/faq";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FAQ() {
+  const { t, lang } = useLanguage();
+  const items = getFaqItems(lang, FAQ_ITEMS);
+
   return (
     <section className="py-12 sm:py-16">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <RevealSection className="text-center">
-          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">Frequently Asked Questions</h2>
-          <p className="mt-2 text-sm text-slate-500">Quick answers to common questions</p>
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{t("faqTitle")}</h2>
+          <p className="mt-2 text-sm text-slate-500">{t("faqSubtitle")}</p>
         </RevealSection>
         <div className="mt-8">
-          <FAQAccordion items={FAQ_ITEMS.slice(0, 6)} />
+          <FAQAccordion items={items.slice(0, 6)} />
         </div>
         <div className="mt-6 text-center">
           <Link href="/faq" className="text-sm font-semibold text-sky-600 hover:text-sky-700">
-            View all FAQs →
+            {t("viewAllFaqs")}
           </Link>
         </div>
       </div>
@@ -58,7 +63,7 @@ export function NewsletterSection() {
             </form>
             <p className="mt-4 text-[10px] text-slate-500">
               By subscribing you agree to our marketing emails. See{" "}
-              <a href="/privacy-policy" className="underline hover:text-sky-400">Privacy Policy</a>.
+              <Link href="/privacy-policy" className="underline hover:text-slate-400">Privacy Policy</Link>
             </p>
           </>
         )}

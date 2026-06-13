@@ -2,6 +2,8 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import StoreShell from "@/components/layout/StoreShell";
 import { CartProvider } from "@/context/CartContext";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { WhatsAppProvider } from "@/context/WhatsAppContext";
 import { ToastProvider } from "@/context/ToastContext";
 import Analytics from "@/components/layout/Analytics";
 import JsonLd from "@/components/seo/JsonLd";
@@ -24,7 +26,7 @@ export const metadata = {
     template: "%s | TrustSilcon",
   },
   description:
-    "Shop premium body-safe silicone intimate wellness products with discreet delivery across India. Medical-grade materials, COD available, plain packaging, fast 3–7 day shipping.",
+    "Shop premium body-safe silicone wellness products with discreet delivery across India. Medical-grade materials, COD available, plain packaging, fast 3–7 day shipping.",
   keywords: [
     "intimate wellness India",
     "body-safe silicone",
@@ -39,8 +41,8 @@ export const metadata = {
   publisher: "TrustSilcon",
   formatDetection: { email: false, address: false, telephone: false },
   openGraph: {
-    title: "TrustSilcon — Premium Intimate Wellness Products India",
-    description: "Body-safe silicone intimate wellness with discreet delivery across India. COD available.",
+    title: "TrustSilcon — Premium Wellness Products India",
+    description: "Body-safe silicone wellness with discreet delivery across India. COD available.",
     siteName: "TrustSilcon",
     type: "website",
     locale: "en_IN",
@@ -67,10 +69,14 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col bg-white font-sans text-slate-800 antialiased">
         <JsonLd data={[organizationSchema(), websiteSchema(), localBusinessSchema()]} />
         <CartProvider>
-          <ToastProvider>
-            <Analytics />
-            <StoreShell>{children}</StoreShell>
-          </ToastProvider>
+          <LanguageProvider>
+            <WhatsAppProvider>
+              <ToastProvider>
+                <Analytics />
+                <StoreShell>{children}</StoreShell>
+              </ToastProvider>
+            </WhatsAppProvider>
+          </LanguageProvider>
         </CartProvider>
       </body>
     </html>

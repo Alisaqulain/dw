@@ -13,6 +13,8 @@ import {
   validatePincode,
 } from "@/lib/utils";
 import { sendOrderConfirmation } from "@/lib/email";
+import { sendOrderConfirmationSMS } from "@/lib/sms";
+import AbandonedCart from "@/models/AbandonedCart";
 
 export async function POST(request) {
   try {
@@ -31,12 +33,13 @@ export async function POST(request) {
       paymentMethod,
       couponCode,
       marketingOptIn,
+      sessionId,
     } = body;
 
-    if (!customerName || !phone || !email || !address || !city || !state || !pincode) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    if (!customerName || !phone || !address || !city || !state || !pincode) {
+      return NextResponse.json({ error: "Name, phone, address, city, state and pincode are required" }, { status: 400 });
     }
-    if (!validateEmail(email)) {
+    if (email && !validateEmail(email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
     if (!validatePhone(phone)) {
@@ -110,7 +113,7 @@ export async function POST(request) {
       orderNumber,
       customerName,
       phone,
-      email: email.toLowerCase(),
+      email: email ? email.toLowerCase() : "",
       address,
       city,
       state,
@@ -121,9 +124,9 @@ export async function POST(request) {
       discount,
       couponCode: appliedCoupon?.code || "",
       total,
-      paymentMethod: paymentMethod || "COD",
-      paymentStatus: paymentMethod === "Online" ? "pending" : "pending",
-      orderStatus: paymentMethod === "Online" ? "pending" : "confirmed",
+      paymentMethod: "COD",
+      paymentStatus: "pending",
+      orderStatus: "confirmed",
       marketingOptIn: !!marketingOptIn,
     });
 
@@ -139,7 +142,7 @@ export async function POST(request) {
     }
 
     // Email subscriber
-    if (marketingOptIn) {
+    if (marketingOptIn && email) {
       await EmailSubscriber.findOneAndUpdate(
         { email: email.toLowerCase() },
         {
@@ -153,10 +156,16 @@ export async function POST(request) {
       );
     }
 
-    // Send confirmation email (non-blocking)
-    sendOrderConfirmation(order).catch(console.error);
+    // Send confirmation email/SMS (non-blocking)
+    if (email) sendOrderConfirmation(order).catch(console.error);
+    sendOrderConfirmationSMS(phone, order.orderNumber, order.total).catch(console.error);
 
-    // Shiprocket shipment is created manually by admin after payment/COD confirmation
+    // Mark abandoned cart as converted
+    if (sessionId) {
+      AbandonedCart.findOneAndUpdate({ sessionId }, { converted: true }).catch(console.error);
+    }
+
+    // Shiprocket shipment is created manually by admin after COD confirmation
 
     return NextResponse.json({
       success: true,

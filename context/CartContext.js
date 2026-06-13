@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getCartLineId } from "@/lib/productVariants";
 import { trackAddToCart } from "@/lib/metaPixel";
+import { trackAddToCartEvent, syncCartSession } from "@/lib/analytics";
 
 const CartContext = createContext(null);
 const CART_KEY = "trustsilcon_cart";
@@ -83,6 +84,7 @@ export function CartProvider({ children }) {
       return [...prev, item];
     });
     trackAddToCart(product, quantity);
+    trackAddToCartEvent(product, quantity);
     if (open) setCartOpen(true);
   }, []);
 
@@ -123,6 +125,12 @@ export function CartProvider({ children }) {
     const save = (item.comparePrice || 0) - item.price;
     return sum + (save > 0 ? save * item.quantity : 0);
   }, 0);
+
+  useEffect(() => {
+    if (!loaded || cart.length === 0) return;
+    const timer = setTimeout(() => syncCartSession(cart, cartTotal), 2000);
+    return () => clearTimeout(timer);
+  }, [cart, cartTotal, loaded]);
 
   return (
     <CartContext.Provider

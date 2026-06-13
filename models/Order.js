@@ -24,7 +24,7 @@ const OrderSchema = new mongoose.Schema(
     orderNumber: { type: String, required: true, unique: true },
     customerName: { type: String, required: true },
     phone: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, default: "" },
     address: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -35,7 +35,7 @@ const OrderSchema = new mongoose.Schema(
     discount: { type: Number, default: 0 },
     couponCode: { type: String, default: "" },
     total: { type: Number, required: true },
-    paymentMethod: { type: String, enum: ["COD", "Online"], default: "COD" },
+    paymentMethod: { type: String, enum: ["COD"], default: "COD" },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "refunded"],

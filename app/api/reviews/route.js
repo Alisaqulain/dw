@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Review from "@/models/Review";
+import Order from "@/models/Order";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request) {
@@ -54,7 +55,16 @@ export async function POST(request) {
       productId: productId || null,
       orderNumber: orderNumber || "",
       approved: false,
+      verifiedBuyer: false,
     });
+
+    if (orderNumber) {
+      const order = await Order.findOne({ orderNumber, orderStatus: "delivered" });
+      if (order) {
+        await Review.findByIdAndUpdate(newReview._id, { verifiedBuyer: true });
+        newReview.verifiedBuyer = true;
+      }
+    }
 
     return NextResponse.json({ review: newReview, message: "Review submitted for approval" }, { status: 201 });
   } catch (error) {
@@ -68,8 +78,17 @@ export async function PUT(request) {
     await connectDB();
     const { id, approved } = await request.json();
 
-    const review = await Review.findByIdAndUpdate(id, { approved }, { new: true });
-    return NextResponse.json({ review });
+    const review = await Review.findById(id);
+    if (!review) return NextResponse.json({ error: "Review not found" }, { status: 404 });
+
+    const updates = { approved };
+    if (approved && review.orderNumber) {
+      const order = await Order.findOne({ orderNumber: review.orderNumber });
+      if (order) updates.verifiedBuyer = true;
+    }
+
+    const updated = await Review.findByIdAndUpdate(id, updates, { new: true });
+    return NextResponse.json({ review: updated });
   } catch (error) {
     if (error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

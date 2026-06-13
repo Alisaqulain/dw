@@ -7,6 +7,7 @@ import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import CartDrawer from "@/components/cart/CartDrawer";
 import QuickViewModal from "@/components/product/QuickViewModal";
+import ExitIntentPopup from "@/components/home/ExitIntentPopup";
 import NewsletterPopup from "@/components/home/NewsletterPopup";
 import AgeVerification from "@/components/legal/AgeVerification";
 import CookieConsent from "@/components/legal/CookieConsent";
@@ -52,6 +53,7 @@ export default function StoreShell({ children }) {
             <>
               <CartDrawer />
               <QuickViewModal />
+              <ExitIntentPopup />
               <NewsletterPopup />
             </>
           )}

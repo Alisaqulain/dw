@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { StatusBadge } from "@/components/shiprocket/DeliveryTimeline";
 import { trackPurchase } from "@/lib/metaPixel";
+import { trackPurchaseEvent } from "@/lib/analytics";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -24,6 +25,7 @@ function SuccessContent() {
     const key = `meta_pixel_purchase_${order.orderNumber}`;
     if (sessionStorage.getItem(key)) return;
     trackPurchase(order);
+    trackPurchaseEvent(order);
     sessionStorage.setItem(key, "1");
   }, [order]);
 

@@ -1,23 +1,17 @@
 import { Suspense } from "react";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import MetaPixel from "@/components/analytics/MetaPixel";
+import Clarity from "@/components/analytics/Clarity";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 export default function Analytics() {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
-
   return (
     <>
-      {gaId && (
-        <>
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`,
-            }}
-          />
-        </>
-      )}
+      <GoogleAnalytics />
+      <Clarity />
       <Suspense fallback={null}>
         <MetaPixel />
+        <PageViewTracker />
       </Suspense>
     </>
   );

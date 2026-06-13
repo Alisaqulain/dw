@@ -9,6 +9,7 @@ import CategoryTiles from "@/components/home/CategoryTiles";
 import ProductCarousel from "@/components/home/ProductSections";
 import DealOfDay, { BundleSection } from "@/components/home/DealAndBundle";
 import WhyTrustSilcon from "@/components/home/WhyTrustSilcon";
+import HomeTrustSection from "@/components/home/HomeTrustSection";
 import HomeCTA from "@/components/home/HomeCTA";
 import { DiscreetDeliverySection, BodySafeSection, ShiprocketSection, BlogGuideSection } from "@/components/home/ContentSections";
 import HomeReviews from "@/components/home/HomeReviews";
@@ -20,9 +21,9 @@ import { FAQ_ITEMS } from "@/lib/faq";
 export const revalidate = 60;
 
 export const metadata = buildMetadata({
-  title: "TrustSilcon — Premium Intimate Wellness Products India",
+  title: "TrustSilcon — Premium Silicone Wellness Collection India",
   description:
-    "Shop premium body-safe silicone intimate wellness products with discreet delivery across India. Medical-grade materials, COD available, plain packaging, 3–7 day shipping. Trusted by 50,000+ customers.",
+    "Shop premium body-safe silicone wellness products with discreet delivery across India. Medical-grade materials, COD available, plain packaging, 3–7 day shipping. Trusted by 50,000+ customers.",
   path: "/",
   keywords: [
     "intimate wellness India",
@@ -76,6 +77,7 @@ export default async function HomePage() {
       <HeroBannerSlider />
       <StatsBar />
       <PromoFeatures />
+      <HomeTrustSection />
       <HotSaleSection products={hotSale} />
       <CategoryTiles />
       <ProductCarousel title="Bestsellers" subtitle="Most loved by our community" products={bestsellers} viewAllHref="/shop?sort=bestseller" />
