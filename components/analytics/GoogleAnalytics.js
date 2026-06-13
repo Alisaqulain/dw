@@ -1,8 +1,7 @@
 import Script from "next/script";
+import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 
-/** GA4 Measurement ID — TrustSilCon Website (Stream 15068285740) */
-export const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_ID?.trim() || "G-7E63SQ3RPY";
+export { GA_MEASUREMENT_ID };
 
 export default function GoogleAnalytics() {
   const gaId = GA_MEASUREMENT_ID;

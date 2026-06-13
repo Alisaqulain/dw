@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || "";
-const GA_ID_ENV = process.env.NEXT_PUBLIC_GA_ID?.trim() || "";
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || "";
+const GA_CONFIGURED = Boolean(GA_MEASUREMENT_ID);
 
 const TEST_VALUE = 999;
 const TEST_CURRENCY = "INR";
@@ -194,12 +194,9 @@ export default function AnalysisPage() {
         <IdRow
           label="GA4 Measurement ID"
           value={GA_MEASUREMENT_ID}
-          hint={GA_ID_ENV ? `Env: ${GA_ID_ENV}` : "Env NEXT_PUBLIC_GA_ID empty — using build fallback G-7E63SQ3RPY. Add to Vercel and redeploy."}
+          hint={!GA_CONFIGURED ? "Set NEXT_PUBLIC_GA_ID in environment variables and redeploy." : undefined}
         />
-        <IdRow
-          label="GA4 Loaded"
-          value={browser.gtag ? "Yes" : "No"}
-        />
+        <IdRow label="GA4 Loaded" value={browser.gtag ? "Yes" : "No"} />
         <IdRow label="Microsoft Clarity ID" value={CLARITY_ID || "(not set)"} />
       </section>
 
@@ -215,9 +212,14 @@ export default function AnalysisPage() {
           <StatusBadge ok={browser.gtag} label={browser.gtag ? "window.gtag = true" : "window.gtag = false"} />
           <StatusBadge ok={browser.clarity} label={browser.clarity ? "window.clarity = true" : "window.clarity = false"} />
         </div>
-        {!browser.gtag && (
+        {!GA_CONFIGURED && (
           <p className="mt-3 text-xs text-amber-700">
-            GA4 fix: set <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_GA_ID=G-7E63SQ3RPY</code> in Vercel → Environment Variables → redeploy. Accept cookies if Meta also blocked.
+            Set <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_GA_ID</code> in Vercel → Environment Variables → redeploy.
+          </p>
+        )}
+        {GA_CONFIGURED && !browser.gtag && (
+          <p className="mt-3 text-xs text-slate-500">
+            GA4 script still loading — wait a moment and click Refresh.
           </p>
         )}
       </section>
