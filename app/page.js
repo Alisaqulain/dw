@@ -1,19 +1,14 @@
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Review from "@/models/Review";
-import HeroBannerSlider from "@/components/home/HeroBannerSlider";
-import StatsBar from "@/components/home/StatsBar";
-import PromoFeatures from "@/components/home/PromoFeatures";
-import HotSaleSection from "@/components/home/HotSaleSection";
+import PremiumHero from "@/components/cro/PremiumHero";
+import BestSellersSection from "@/components/cro/BestSellersSection";
 import CategoryTiles from "@/components/home/CategoryTiles";
-import ProductCarousel from "@/components/home/ProductSections";
-import DealOfDay, { BundleSection } from "@/components/home/DealAndBundle";
-import WhyTrustSilcon from "@/components/home/WhyTrustSilcon";
-import HomeTrustSection from "@/components/home/HomeTrustSection";
-import HomeCTA from "@/components/home/HomeCTA";
-import { DiscreetDeliverySection, BodySafeSection, ShiprocketSection, BlogGuideSection } from "@/components/home/ContentSections";
+import WhyChooseUs from "@/components/cro/WhyChooseUs";
 import HomeReviews from "@/components/home/HomeReviews";
-import FAQ, { NewsletterSection } from "@/components/home/FAQ";
+import FAQ from "@/components/home/FAQ";
+import { DiscreetDeliverySection } from "@/components/home/ContentSections";
+import WhatsAppHelpCTA from "@/components/cro/WhatsAppHelpCTA";
 import JsonLd from "@/components/seo/JsonLd";
 import { buildMetadata, faqSchema } from "@/lib/seo";
 import { FAQ_ITEMS } from "@/lib/faq";
@@ -39,74 +34,46 @@ export const metadata = buildMetadata({
 async function getHomeData() {
   try {
     await connectDB();
-    const [bestsellers, newArrivals, dealProducts, bundles, reviews, saleCandidates] = await Promise.all([
-      Product.find({ active: true, bestseller: true }).limit(10).lean(),
-      Product.find({ active: true }).sort({ createdAt: -1 }).limit(8).lean(),
-      Product.find({ active: true, dealOfDay: true }).limit(1).lean(),
-      Product.find({ active: true, isBundle: true }).limit(4).lean(),
-      Review.find({ approved: true }).sort({ createdAt: -1 }).limit(8).lean(),
-      Product.find({ active: true, comparePrice: { $gt: 0 } }).limit(24).lean(),
+    const [bestsellers, allActive, reviews] = await Promise.all([
+      Product.find({ active: true, bestseller: true }).limit(12).lean(),
+      Product.find({ active: true }).sort({ createdAt: -1 }).limit(12).lean(),
+      Review.find({ approved: true }).sort({ createdAt: -1 }).limit(12).lean(),
     ]);
 
-    const dealOfDay = dealProducts[0] || (await Product.findOne({ active: true, comparePrice: { $gt: 0 } }).sort({ createdAt: -1 }).lean());
+    const merged = [...bestsellers];
+    for (const p of allActive) {
+      if (merged.length >= 8) break;
+      if (!merged.some((b) => String(b._id) === String(p._id))) merged.push(p);
+    }
 
-    const hotSale = saleCandidates
-      .filter((p) => p.comparePrice > p.price)
-      .sort((a, b) => (b.comparePrice - b.price) / b.comparePrice - (a.comparePrice - a.price) / a.comparePrice)
-      .slice(0, 8);
+    const featured = merged[0] || allActive[0] || null;
 
     return {
-      bestsellers: JSON.parse(JSON.stringify(bestsellers)),
-      newArrivals: JSON.parse(JSON.stringify(newArrivals)),
-      hotSale: JSON.parse(JSON.stringify(hotSale)),
-      dealOfDay: dealOfDay ? JSON.parse(JSON.stringify(dealOfDay)) : null,
-      bundles: JSON.parse(JSON.stringify(bundles)),
+      bestsellers: JSON.parse(JSON.stringify(merged)),
+      featuredProduct: featured ? JSON.parse(JSON.stringify(featured)) : null,
       reviews: JSON.parse(JSON.stringify(reviews)),
     };
   } catch {
-    return { bestsellers: [], newArrivals: [], hotSale: [], dealOfDay: null, bundles: [], reviews: [] };
+    return { bestsellers: [], featuredProduct: null, reviews: [] };
   }
 }
 
 export default async function HomePage() {
-  const { bestsellers, newArrivals, hotSale, dealOfDay, bundles, reviews } = await getHomeData();
+  const { bestsellers, featuredProduct, reviews } = await getHomeData();
 
   return (
     <>
       <JsonLd data={faqSchema(FAQ_ITEMS.slice(0, 6))} />
-      <HeroBannerSlider />
-      <StatsBar />
-      <PromoFeatures />
-      <HomeTrustSection />
-      <HotSaleSection products={hotSale} />
+      <PremiumHero featuredProduct={featuredProduct} />
+      <BestSellersSection products={bestsellers} />
       <CategoryTiles />
-      <ProductCarousel title="Bestsellers" subtitle="Most loved by our community" products={bestsellers} viewAllHref="/shop?sort=bestseller" />
-      {/* 7. New arrivals */}
-      <div className="bg-sky-50/30">
-        <ProductCarousel title="New Arrivals" subtitle="Fresh additions to our wellness collection" products={newArrivals} viewAllHref="/shop?sort=newest" />
-      </div>
-      {/* 8. Deal of the day */}
-      <DealOfDay product={dealOfDay} />
-      {/* 9. Bundle offers */}
-      <BundleSection products={bundles} />
-      {/* 10. Why choose TrustSilcon */}
-      <WhyTrustSilcon />
-      {/* 11. Discreet delivery */}
-      <DiscreetDeliverySection />
-      {/* 12. Body-safe silicone */}
-      <BodySafeSection />
-      {/* 13. Shiprocket tracking */}
-      <ShiprocketSection />
-      {/* 14. Customer reviews */}
+      <WhyChooseUs />
       <HomeReviews reviews={reviews} />
-      {/* 15. CTA banner */}
-      <HomeCTA />
-      {/* 16. FAQ */}
       <FAQ />
-      {/* 16. Blog/guide */}
-      <BlogGuideSection />
-      {/* 17. Newsletter */}
-      <NewsletterSection />
+      <DiscreetDeliverySection />
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <WhatsAppHelpCTA context="homepage" />
+      </div>
     </>
   );
 }

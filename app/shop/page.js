@@ -7,6 +7,8 @@ import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/Loading";
 import Link from "next/link";
 import { COLLECTIONS } from "@/lib/constants";
+import ShopCROHeader from "@/components/cro/ShopCROHeader";
+import WhyChooseUs from "@/components/cro/WhyChooseUs";
 
 function buildShopParams({
   search = "",
@@ -380,6 +382,9 @@ function ShopContent() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <ShopCROHeader bestsellerSlug={products.find((p) => p.bestseller)?.slug || products[0]?.slug} />
+      <WhyChooseUs title="Why Customers Choose TrustSilcon" />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs text-slate-400">Home / Shop</p>
@@ -496,7 +501,7 @@ function ShopContent() {
               }
             />
           ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-3">
               {products.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}

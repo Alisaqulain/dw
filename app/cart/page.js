@@ -7,6 +7,7 @@ import Link from "next/link";
 import { formatPrice, getDeliveryCharge } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/Loading";
 import TrustBadges, { CodBadge } from "@/components/ui/TrustBadges";
+import WhatsAppHelpCTA from "@/components/cro/WhatsAppHelpCTA";
 
 export default function CartPage() {
   const { cart, cartTotal, updateQuantity, removeFromCart } = useCart();
@@ -83,6 +84,8 @@ export default function CartPage() {
           <p className="mt-3 text-center text-xs text-slate-400">💵 {t("codBadge")}</p>
         </div>
       </div>
+
+      <WhatsAppHelpCTA context="cart" className="mt-8" />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import QuickViewModal from "@/components/product/QuickViewModal";
 import ExitIntentPopup from "@/components/home/ExitIntentPopup";
 import NewsletterPopup from "@/components/home/NewsletterPopup";
+import StickyTrustBar from "@/components/cro/StickyTrustBar";
 import AgeVerification from "@/components/legal/AgeVerification";
 import CookieConsent from "@/components/legal/CookieConsent";
 import { useCart } from "@/context/CartContext";
@@ -26,6 +27,7 @@ function MobileBottomNavWrapper() {
 export default function StoreShell({ children }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
+  const hideTrustBar = isAdmin || pathname?.startsWith("/analysis");
   const { loaded } = useCart();
   const [ageOk, setAgeOk] = useState(false);
 
@@ -44,6 +46,7 @@ export default function StoreShell({ children }) {
       {ageOk && (
         <>
           <Header />
+          {!hideTrustBar && <StickyTrustBar />}
           <main className="flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0">{children}</main>
           <Footer />
           <MobileBottomNavWrapper />

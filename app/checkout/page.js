@@ -10,6 +10,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { formatPrice, getDeliveryCharge } from "@/lib/utils";
 import TrustBadges, { CodBadge } from "@/components/ui/TrustBadges";
 import Link from "next/link";
+import WhatsAppHelpCTA from "@/components/cro/WhatsAppHelpCTA";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa",
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     customerName: "", phone: "", email: "", address: "",
     city: "", state: "", pincode: "", paymentMethod: "COD", marketingOptIn: false,
@@ -58,6 +60,7 @@ export default function CheckoutPage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setErrors((prev) => ({ ...prev, [name]: "" }));
     setForm((prev) => {
       const next = { ...prev, [name]: type === "checkbox" ? checked : value };
       if (["phone", "email", "customerName"].includes(name) && (next.phone || next.email)) {
@@ -89,10 +92,27 @@ export default function CheckoutPage() {
     }
   };
 
+  const validateForm = () => {
+    const next = {};
+    if (!form.customerName.trim()) next.customerName = "Full name is required";
+    if (!/^[6-9]\d{9}$/.test(form.phone)) next.phone = "Enter a valid 10-digit mobile number";
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "Enter a valid email address";
+    if (!form.address.trim()) next.address = "Address is required";
+    if (!form.city.trim()) next.city = "City is required";
+    if (!form.state) next.state = "Please select your state";
+    if (!/^[1-9]\d{5}$/.test(form.pincode)) next.pincode = "Enter a valid 6-digit pincode";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
       showToast("Cart is empty", "error");
+      return;
+    }
+    if (!validateForm()) {
+      showToast("Please fix the highlighted fields", "error");
       return;
     }
     setLoading(true);
@@ -135,7 +155,12 @@ export default function CheckoutPage() {
     );
   }
 
-  const inputClass = "mt-1 w-full rounded-xl border border-sky-100 px-4 py-2.5 text-sm outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100";
+  const inputClass = (field) =>
+    `mt-1 w-full min-h-[44px] rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+      errors[field]
+        ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+        : "border-sky-100 focus:border-sky-300 focus:ring-sky-100"
+    }`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -153,34 +178,41 @@ export default function CheckoutPage() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="text-xs font-medium text-slate-500">{t("fullName")} *</label>
-                <input name="customerName" required value={form.customerName} onChange={handleChange} className={inputClass} />
+                <input name="customerName" required value={form.customerName} onChange={handleChange} className={inputClass("customerName")} />
+                {errors.customerName && <p className="mt-1 text-xs text-red-500">{errors.customerName}</p>}
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-500">{t("phone")} *</label>
-                <input name="phone" required pattern="[6-9][0-9]{9}" value={form.phone} onChange={handleChange} className={inputClass} placeholder="10-digit mobile" />
+                <input name="phone" required inputMode="numeric" pattern="[6-9][0-9]{9}" value={form.phone} onChange={handleChange} className={inputClass("phone")} placeholder="10-digit mobile" />
+                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-500">{t("email")}</label>
-                <input name="email" type="email" value={form.email} onChange={handleChange} className={inputClass} />
+                <input name="email" type="email" value={form.email} onChange={handleChange} className={inputClass("email")} />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               <div className="sm:col-span-2">
                 <label className="text-xs font-medium text-slate-500">{t("address")} *</label>
-                <textarea name="address" required rows={2} value={form.address} onChange={handleChange} className={inputClass} />
+                <textarea name="address" required rows={2} value={form.address} onChange={handleChange} className={inputClass("address")} />
+                {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address}</p>}
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-500">{t("city")} *</label>
-                <input name="city" required value={form.city} onChange={handleChange} className={inputClass} />
+                <input name="city" required value={form.city} onChange={handleChange} className={inputClass("city")} />
+                {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-500">{t("state")} *</label>
-                <select name="state" required value={form.state} onChange={handleChange} className={inputClass}>
+                <select name="state" required value={form.state} onChange={handleChange} className={inputClass("state")}>
                   <option value="">{t("selectState")}</option>
                   {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
+                {errors.state && <p className="mt-1 text-xs text-red-500">{errors.state}</p>}
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-500">{t("pincode")} *</label>
-                <input name="pincode" required pattern="[1-9][0-9]{5}" value={form.pincode} onChange={handleChange} className={inputClass} />
+                <input name="pincode" required inputMode="numeric" pattern="[1-9][0-9]{5}" value={form.pincode} onChange={handleChange} className={inputClass("pincode")} />
+                {errors.pincode && <p className="mt-1 text-xs text-red-500">{errors.pincode}</p>}
               </div>
             </div>
           </div>
@@ -237,6 +269,8 @@ export default function CheckoutPage() {
           <p className="mt-3 text-center text-xs text-slate-400">💵 {t("codBadge")}</p>
         </div>
       </form>
+
+      <WhatsAppHelpCTA context="checkout" className="mt-8" />
     </div>
   );
 }

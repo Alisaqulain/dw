@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { requireAdmin } from "@/lib/auth";
 import Product from "@/models/Product";
+import Review from "@/models/Review";
 import Coupon from "@/models/Coupon";
+import { SEED_REVIEWS } from "@/lib/seedReviews";
 
 const sampleProducts = [
   {
@@ -107,7 +109,41 @@ export async function POST() {
       { code: "WELCOME10", discountType: "percentage", discountValue: 10, minOrderAmount: 499, maxUses: 100, active: true },
       { upsert: true }
     );
-    return NextResponse.json({ success: true, message: "Sample data seeded (8 products)" });
+
+    const products = await Product.find({ active: true }).lean();
+    const slugMap = Object.fromEntries(products.map((p) => [p.slug, p._id]));
+    let reviewCount = 0;
+
+    for (const r of SEED_REVIEWS) {
+      const productId = slugMap[r.productSlug] || products[reviewCount % products.length]?._id;
+      if (!productId) continue;
+      await Review.findOneAndUpdate(
+        { name: r.name, review: r.review },
+        {
+          name: r.name,
+          city: r.city || "",
+          rating: r.rating,
+          review: r.review,
+          productId,
+          approved: true,
+          verifiedBuyer: true,
+          orderNumber: `TS-SEED-${reviewCount + 1}`,
+        },
+        { upsert: true }
+      );
+      reviewCount++;
+    }
+
+    for (const p of products) {
+      const revs = await Review.find({ productId: p._id, approved: true }).lean();
+      const avg = revs.length ? revs.reduce((s, x) => s + x.rating, 0) / revs.length : 0;
+      await Product.findByIdAndUpdate(p._id, {
+        avgRating: Math.round(avg * 10) / 10,
+        reviewCount: revs.length,
+      });
+    }
+
+    return NextResponse.json({ success: true, message: `Sample data seeded (${sampleProducts.length} products, ${reviewCount} reviews)` });
   } catch (error) {
     if (error.message === "Unauthorized") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     return NextResponse.json({ error: error.message }, { status: 500 });
